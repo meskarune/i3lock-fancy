@@ -4,9 +4,10 @@ i3lock-fancy
 i3lock script that takes a screenshot of the desktop, blurs the background and adds a lock icon and text
 
 Depends:
-i3lock-color-git
-imagemagick
-scrot
+* i3lock-color-git
+* imagemagick
+* scrot
+* Liberation Fonts
 
 Screenshot:
 
