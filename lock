@@ -4,6 +4,8 @@
 # imagemagick
 # i3lock-color-git
 # scrot
+# bitmap font support and artwiz fonts - http://crunchbang.org/forums/viewtopic.php?pid=196047
+# for an available font of your choice, you can replace the two instances of 'mintsstrong' below; you will also have to modify the first value after the annotate option
  
 IMAGE=/tmp/i3lock.png
  
@@ -14,7 +16,20 @@ IMAGE=/tmp/i3lock.png
 BLURTYPE="2x8" # 2.90s
 #BLURTYPE="2x3" # 2.92s
 
+VALUE="60" #brightness value to compare to
+
 scrot $IMAGE
-convert $IMAGE -level 0%,100%,0.6 -blur $BLURTYPE -font Liberation-Sans -pointsize 26 -fill white -gravity center -annotate +0+200 'Type password to unlock' - | composite -gravity center lock.png - $IMAGE
-i3lock --textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 --insidevercolor=0000001c --ringwrongcolor=00000055 --insidewrongcolor=0000001c  -i $IMAGE
+COLOR=`convert $IMAGE -colorspace hsb -resize 1x1 txt:- | sed -E '/.*$/ {
+                             N
+                             s/.*\n.*([0-9]{1,2}[^\.])\.[0-9]+%\)$/\1/
+                             }'`;
+if [ "$COLOR" -gt "$VALUE" ]; then
+	#echo "white image, black text"
+	convert $IMAGE -level 0%,100%,0.6 -blur $BLURTYPE -font mintsstrong -fill black -gravity center -annotate -48+120 'READY PLAYER ONE' - | composite -gravity center ~/bin/i3lock/kat.png - $IMAGE
+	i3lock --textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e --linecolor=00000000 --keyhlcolor=ffffff80 --ringvercolor=ffffff00 --insidevercolor=ffffff1c --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c  -i $IMAGE
+else
+	#echo "black image, white text"
+	convert $IMAGE -level 0%,100%,0.6 -blur $BLURTYPE -font mintsstrong -fill white -gravity center -annotate -48+120 'READY PLAYER ONE' - | composite -gravity center ~/bin/i3lock/kat.png - $IMAGE
+	i3lock --textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 --insidevercolor=0000001c --ringwrongcolor=00000055 --insidewrongcolor=0000001c  -i $IMAGE
+fi
 rm $IMAGE
