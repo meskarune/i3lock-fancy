@@ -22,7 +22,7 @@ COLOR=`convert $IMAGE -colorspace hsb -resize 1x1 txt:- | sed -E '/.*$/ {
                              s/.*\n.*([0-9]{1,2}[^\.])\.[0-9]+%\)$/\1/
                              }'`;
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
-	convert $IMAGE -level 0%,100%,0.6 -blur $BLURTYPE -font Liberation-Sans -pointsize 26 -fill black -gravity center -annotate +0+200 'Type password to unlock' - | composite -gravity center lock.png - $IMAGE
+	convert $IMAGE -level 0%,100%,0.6 -blur $BLURTYPE -font Liberation-Sans -pointsize 26 -fill black -gravity center -annotate +0+200 'Type password to unlock' - | composite -gravity center lockdark.png - $IMAGE
 	i3lock --textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e --linecolor=00000000 --keyhlcolor=ffffff80 --ringvercolor=ffffff00 --insidevercolor=ffffff1c --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c  -i $IMAGE
 else #black 
 	convert $IMAGE -level 0%,100%,0.6 -blur $BLURTYPE -font Liberation-Sans -pointsize 26 -fill white -gravity center -annotate +0+200 'Type password to unlock' - | composite -gravity center lock.png - $IMAGE
