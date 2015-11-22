@@ -2,7 +2,7 @@
 
 # Dependencies: imagemagick, i3lock-color-git, scrot
 
-IMAGE=/tmp/i3lock.png
+IMAGE=$(mktemp).png
 
 VALUE="60" #brightness value to compare to
 scrot $IMAGE
