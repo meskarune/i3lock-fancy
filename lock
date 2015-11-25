@@ -9,6 +9,7 @@ TEXT="Type password to unlock"
 case $LANG in
     fr_* ) TEXT="Entrez votre mot de passe" ;; # Français
     es_* ) TEXT="Ingrese su contraseña" ;; # Española
+    pl_* ) TEXT="Podaj hasło" ;; # Polish
 esac
 
 
