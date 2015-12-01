@@ -6,7 +6,7 @@
 # scrot
  
 IMAGE=/tmp/i3lock.png
-TEXT="type_password_to_unlock"
+TEXT="locked"
 SCRIPT=`realpath $0`
 SCRIPTPATH=`dirname $SCRIPT`
 # All options are here: http://www.imagemagick.org/Usage/blur/#blur_args
@@ -21,6 +21,6 @@ if [[ $1 != "" ]]; then
 fi
 
 scrot $IMAGE
-convert $IMAGE -filter Gaussian -resize 50% -define filter:sigma=2 -resize 200% -fill black -colorize 30% -font $SCRIPTPATH/Digital_tech.otf -pointsize 40 -fill '#1d1f21d0' -gravity center -annotate +2+202 $TEXT -font $SCRIPTPATH/Digital_tech.otf -pointsize 40 -fill '#ffffffe0' -gravity center -annotate +0+200 $TEXT - | composite -gravity center $SCRIPTPATH/lock.png - $IMAGE
+convert $IMAGE -filter Gaussian -resize 50% -define filter:sigma=2 -resize 200% -fill black -colorize 35% -font $SCRIPTPATH/Digital_tech.otf -pointsize 40 -fill '#1d1f21d0' -gravity center -annotate +2+202 $TEXT -font $SCRIPTPATH/Digital_tech.otf -pointsize 40 -fill '#ffffffe0' -gravity center -annotate +0+200 $TEXT - | composite -gravity center $SCRIPTPATH/lock.png - $IMAGE
 i3lock --textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 --insidevercolor=0000001c --ringwrongcolor=00000055 --insidewrongcolor=0000001c  -i $IMAGE
 rm $IMAGE
