@@ -27,7 +27,7 @@ COLOR=`convert $IMAGE -colorspace hsb -resize 1x1 txt:- | sed -E '/.*$/ {
 # pixelate: -scale 10% -scale 1000%
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
     convert $IMAGE -level 0%,100%,0.6 \
-        -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500% \
+        -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5% \
         -font Liberation-Sans -pointsize 26 -fill black -gravity center \
         -annotate +0+160 "$TEXT" \
         $SCRIPTPATH/lockdark.png -gravity center -composite $IMAGE
@@ -36,7 +36,7 @@ if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
         --insidevercolor=ffffff1c --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c'
 else #black
     convert $IMAGE -level 0%,100%,0.6 \
-        -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500% \
+        -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5% \
         -font Liberation-Sans -pointsize 26 -fill white -gravity center \
         -annotate +0+160 "$TEXT" \
         $SCRIPTPATH/lock.png -gravity center -composite $IMAGE
