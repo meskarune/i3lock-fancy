@@ -19,7 +19,7 @@ case $LANG in
 esac
 
 VALUE="60" #brightness value to compare to
-scrot $IMAGE
+scrot -z $IMAGE
 COLOR=`convert $IMAGE -colorspace hsb -resize 1x1 txt:- | sed -E '/.*$/ {
                              N
                              s/.*\n.*([0-9]{1,2}[^\.])\.[0-9]+%\)$/\1/
