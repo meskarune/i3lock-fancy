@@ -17,6 +17,7 @@ case $LANG in
     es_* ) TEXT="Ingrese su contraseña" ;; # Española
     fr_* ) TEXT="Entrez votre mot de passe" ;; # Français
     pl_* ) TEXT="Podaj hasło" ;; # Polish
+    de_* ) TEXT="Geben Sie Ihr Passwort ein";; # German
 esac
 
 VALUE="60" #brightness value to compare to
