@@ -13,6 +13,7 @@ popd > /dev/null
  
 # l10n support
 case $LANG in
+	  de_* ) TEXT="Bitte Passwort eingeben" ;; # Deutsch
     fr_* ) TEXT="Entrez votre mot de passe" ;; # Français
     es_* ) TEXT="Ingrese su contraseña" ;; # Española
     pl_* ) TEXT="Podaj hasło" ;; # Polish
