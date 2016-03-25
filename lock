@@ -2,13 +2,13 @@
 
 # Dependencies: imagemagick, i3lock-color-git, scrot
 
-IMAGE=$(mktemp).png
+IMAGE="$(mktemp).png"
 FONT="$(fc-match sans -f "%{family}\n")"
 
 # get path where the script is located
 # it's used for the lock icon
-pushd `dirname $0` > /dev/null
-SCRIPTPATH=`pwd`
+pushd $(dirname $0) > /dev/null
+SCRIPTPATH=$(pwd)
 popd > /dev/null
  
 # l10n support
