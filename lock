@@ -21,7 +21,8 @@ esac
 
 VALUE="60" #brightness value to compare to
 scrot -z $IMAGE
-COLOR=`convert $IMAGE -colorspace hsb -resize 1x1 txt:- | sed -E '/.*$/ {
+COLOR=`convert $IMAGE -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
+       -resize 1x1 txt:- | sed -E '/.*$/ {
                              N
                              s/.*\n.*([0-9]{1,2}[^\.])\.[0-9]+%\)$/\1/
                              }'`;
@@ -34,7 +35,8 @@ if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
         $SCRIPTPATH/lockdark.png -gravity center -composite $IMAGE
     PARAM='--textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e \
         --linecolor=00000000 --keyhlcolor=ffffff80 --ringvercolor=ffffff00 \
-        --insidevercolor=ffffff1c --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c'
+        --separatorcolor=22222260 --insidevercolor=ffffff1c \
+        --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c'
 else #black
     convert $IMAGE -level 0%,100%,0.6 \
         -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5% \
@@ -43,11 +45,12 @@ else #black
         $SCRIPTPATH/lock.png -gravity center -composite $IMAGE
     PARAM='--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
         --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 \
-        --insidevercolor=0000001c --ringwrongcolor=00000055 --insidewrongcolor=0000001c'
+        --separatorcolor=22222260 --insidevercolor=0000001c \
+        --ringwrongcolor=00000055 --insidewrongcolor=0000001c'
 fi
 
 # try to use a forked version of i3lock with prepared parameters
-i3lock $PARAM -i $IMAGE > /dev/null 2>&1
+i3lock-color $PARAM -i $IMAGE > /dev/null 2>&1
 
 if [ $? -ne 0 ]; then
     # We have failed, lets get back to stock one
