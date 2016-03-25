@@ -1,16 +1,18 @@
 #!/bin/bash
-
+# Author: Dolores Portalatin <hello@doloresportalatin.info>
 # Dependencies: imagemagick, i3lock-color-git, scrot
 
 IMAGE="$(mktemp).png"
-FONT="$(fc-match sans -f "%{family}\n")"
+# Use system default sans font
+FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
+# Set your own font. List with "convert list font" in a terminal
+#FONT="Noto-Sans"
 
-# get path where the script is located
-# it's used for the lock icon
+# get path where the script is located to find the lock icon
 pushd $(dirname $0) > /dev/null
 SCRIPTPATH=$(pwd)
 popd > /dev/null
- 
+
 # l10n support
 TEXT="Type password to unlock"
 case $LANG in
@@ -28,7 +30,7 @@ COLOR=`convert $IMAGE -gravity center -crop 100x100+0+0 +repage -colorspace hsb 
                              N
                              s/.*\n.*([0-9]{1,2}[^\.])\.[0-9]+%\)$/\1/
                              }'`;
-# pixelate: -scale 10% -scale 1000%
+# to pixelate: -scale 10% -scale 1000%
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
     convert $IMAGE -level 0%,100%,0.6 \
         -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5% \
