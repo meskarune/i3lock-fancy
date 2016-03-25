@@ -3,17 +3,20 @@
 # Dependencies: imagemagick, i3lock-color-git, scrot
 
 IMAGE=$(mktemp).png
-TEXT="Type password to unlock"
+#FONT=$(fc-match sans -f %{family})
+FONT="$(fc-match sans -f "%{family}\n")"
 
 # get path where the script is located
-# its used for the lock icon
+# it's used for the lock icon
 pushd `dirname $0` > /dev/null
 SCRIPTPATH=`pwd`
 popd > /dev/null
  
 # l10n support
+TEXT="Type password to unlock"
 case $LANG in
     de_* ) TEXT="Bitte Passwort eingeben" ;; # Deutsch
+    en_* ) TEXT="Type password to unlock" ;; # English
     es_* ) TEXT="Ingrese su contraseña" ;; # Española
     fr_* ) TEXT="Entrez votre mot de passe" ;; # Français
     pl_* ) TEXT="Podaj hasło" ;; # Polish
@@ -30,7 +33,7 @@ COLOR=`convert $IMAGE -gravity center -crop 100x100+0+0 +repage -colorspace hsb 
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
     convert $IMAGE -level 0%,100%,0.6 \
         -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5% \
-        -font Liberation-Sans -pointsize 26 -fill black -gravity center \
+        -font $FONT -pointsize 26 -fill black -gravity center \
         -annotate +0+160 "$TEXT" \
         $SCRIPTPATH/lockdark.png -gravity center -composite $IMAGE
     PARAM='--textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e \
@@ -40,7 +43,7 @@ if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
 else #black
     convert $IMAGE -level 0%,100%,0.6 \
         -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5% \
-        -font Liberation-Sans -pointsize 26 -fill white -gravity center \
+        -font $FONT -pointsize 26 -fill white -gravity center \
         -annotate +0+160 "$TEXT" \
         $SCRIPTPATH/lock.png -gravity center -composite $IMAGE
     PARAM='--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
