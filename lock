@@ -3,7 +3,6 @@
 # Dependencies: imagemagick, i3lock-color-git, scrot
 
 IMAGE=$(mktemp).png
-#FONT=$(fc-match sans -f %{family})
 FONT="$(fc-match sans -f "%{family}\n")"
 
 # get path where the script is located
