@@ -52,24 +52,23 @@ COLOR=`convert $IMAGE -gravity center -crop 100x100+0+0 +repage -colorspace hsb 
                              s/.*\n.*([0-9]{1,2}[^\.])\.[0-9]+%\)$/\1/
                              }'`;
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
-    convert $IMAGE $HUE $EFFECT \
-        -font $FONT -pointsize 26 -fill black -gravity center \
-        -annotate +0+160 "$TEXT" \
-        $SCRIPTPATH/lockdark.png -gravity center -composite $IMAGE
+    BW="black"
+    ICON="$SCRIPTPATH/lockdark.png"
     PARAM='--textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e \
         --linecolor=00000000 --keyhlcolor=ffffff80 --ringvercolor=ffffff00 \
         --separatorcolor=22222260 --insidevercolor=ffffff1c \
         --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c'
 else #black
-    convert $IMAGE $HUE $EFFECT \
-        -font $FONT -pointsize 26 -fill white -gravity center \
-        -annotate +0+160 "$TEXT" \
-        $SCRIPTPATH/lock.png -gravity center -composite $IMAGE
+    BW="white"
+    ICON="$SCRIPTPATH/lock.png"
     PARAM='--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
         --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 \
         --separatorcolor=22222260 --insidevercolor=0000001c \
         --ringwrongcolor=00000055 --insidewrongcolor=0000001c'
 fi
+
+convert $IMAGE $HUE $EFFECT -font $FONT -pointsize 26 -fill $BW -gravity center \
+    -annotate +0+160 "$TEXT" $ICON -gravity center -composite $IMAGE
 
 # try to use a forked version of i3lock with prepared parameters
 i3lock-color $PARAM -i $IMAGE > /dev/null 2>&1
