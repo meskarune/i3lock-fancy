@@ -2,9 +2,30 @@
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
 # Dependencies: imagemagick, i3lock-color-git, scrot
 
-IMAGE="$(mktemp).png"
-# Use system default sans font
+HUE="-level 0%,100%,0.6"
+EFFECT="-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%"
+# default system sans-serif font
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
+IMAGE="$(mktemp).png"
+
+set -o errexit -o noclobber -o nounset -o pipefail
+TEMP="$(getopt -o pgf: -l pixelate,greyscale,font: --name "$0" -- "$@")"
+eval set -- "$TEMP"
+
+while true ; do
+    case "$1" in
+        -g|--greyscale) HUE="-level 0%,100%,0.6 -set colorspace Gray -separate -average" ; shift ;;
+        -p|--pixelate) EFFECT="-scale 10% -scale 1000%" ; shift ;;
+        -f|--font)
+            case "$2" in
+                "") shift 2 ;;
+                *) FONT=$2 ; shift 2 ;;
+            esac ;;
+        --) shift ; break ;;
+        *) echo "error" ; exit 1 ;;
+    esac
+done
+
 # Set your own font. List with "convert list font" in a terminal
 #FONT="Noto-Sans"
 
@@ -30,10 +51,8 @@ COLOR=`convert $IMAGE -gravity center -crop 100x100+0+0 +repage -colorspace hsb 
                              N
                              s/.*\n.*([0-9]{1,2}[^\.])\.[0-9]+%\)$/\1/
                              }'`;
-# to pixelate: -scale 10% -scale 1000%
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
-    convert $IMAGE -level 0%,100%,0.6 \
-        -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5% \
+    convert $IMAGE $HUE $EFFECT \
         -font $FONT -pointsize 26 -fill black -gravity center \
         -annotate +0+160 "$TEXT" \
         $SCRIPTPATH/lockdark.png -gravity center -composite $IMAGE
@@ -42,8 +61,7 @@ if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
         --separatorcolor=22222260 --insidevercolor=ffffff1c \
         --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c'
 else #black
-    convert $IMAGE -level 0%,100%,0.6 \
-        -filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5% \
+    convert $IMAGE $HUE $EFFECT \
         -font $FONT -pointsize 26 -fill white -gravity center \
         -annotate +0+160 "$TEXT" \
         $SCRIPTPATH/lock.png -gravity center -composite $IMAGE
