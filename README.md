@@ -13,7 +13,9 @@ Dependancies
 * [i3lock-color-git](https://github.com/Arcaena/i3lock-color) - this is a fork of i3lock-color that is kept up to date with i3lock
 * imagemagick
 * scrot
-* Liberation Fonts
+* bash
+* awk
+* utils-linux
 
 Installation
 ------------
@@ -25,13 +27,13 @@ git clone the repository and copy lock, lock.png and lockdark.png to
 Usage
 -----
 
-lock [options]
+    lock [options]
 
-Options:
-    -h, --help   This help menu.
-    -g, --greyscale  Set background to greyscale instead of color.
-    -p, --pixelate   Pixelate the background instead of blur, runs faster.
-    -f <fontname>, --font <fontname>  Set a custom font. Type 'convert -list font' in a terminal to get a list.
+    Options:
+        -h, --help   This help menu.
+        -g, --greyscale  Set background to greyscale instead of color.
+        -p, --pixelate   Pixelate the background instead of blur, runs faster.
+        -f <fontname>, --font <fontname>  Set a custom font. Type 'convert -list font' in a terminal to get a list.
 
 example: ```lock -gpf Comic-Sans-MS```
 
