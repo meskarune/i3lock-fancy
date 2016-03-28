@@ -15,6 +15,29 @@ Dependancies
 * scrot
 * Liberation Fonts
 
+Installation
+------------
+Arch Linux Package: https://aur.archlinux.org/packages/i3lock-fancy-git/
+
+git clone the repository and copy lock, lock.png and lockdark.png to
+"/usr/local/bin"
+
+Usage
+-----
+
+lock [options]
+
+Options:
+    -h, --help   This help menu.
+    -g, --greyscale  Set background to greyscale instead of color.
+    -p, --pixelate   Pixelate the background instead of blur, runs faster.
+    -f <fontname>, --font <fontname>  Set a custom font. Type 'convert -list font' in a terminal to get a list.
+
+example: ```lock -gpf Comic-Sans-MS```
+
+Extras
+------
+
 The lock screen in action:
 
 ![lockscreen animation](https://raw.githubusercontent.com/meskarune/i3lock-fancy/master/action.gif)
