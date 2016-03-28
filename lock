@@ -1,6 +1,7 @@
 #!/bin/bash
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
 # Dependencies: imagemagick, i3lock-color-git, scrot
+set -o errexit -o noclobber -o nounset -o pipefail
 
 HUE="-level 0%,100%,0.6"
 EFFECT="-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%"
@@ -14,7 +15,6 @@ OPTIONS="Options:
     -p, --pixelate   Pixelate the background instead of blur, runs faster.
     -f <fontname>, --font <fontname>  Set a custom font. Type 'convert -list font' in a terminal to get a list."
 
-set -o errexit -o noclobber -o nounset -o pipefail
 TEMP="$(getopt -o :hpgf: -l help,pixelate,greyscale,font: --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
