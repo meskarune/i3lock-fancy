@@ -73,9 +73,7 @@ convert $IMAGE $HUE $EFFECT -font $FONT -pointsize 26 -fill $BW -gravity center 
     -annotate +0+160 "$TEXT" $ICON -gravity center -composite $IMAGE
 
 # try to use a forked version of i3lock with prepared parameters
-i3lock $PARAM -i $IMAGE > /dev/null 2>&1
-
-if [ $? -ne 0 ]; then
+if ! i3lock $PARAM -i $IMAGE > /dev/null 2>&1; then
     # We have failed, lets get back to stock one
     i3lock -i $IMAGE
 fi
