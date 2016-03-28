@@ -15,6 +15,8 @@ OPTIONS="Options:
     -p, --pixelate   Pixelate the background instead of blur, runs faster.
     -f <fontname>, --font <fontname>  Set a custom font. Type 'convert -list font' in a terminal to get a list."
 
+set -o errexit -o noclobber -o nounset -o pipefail
+trap 'rm -f "$IMAGE"' EXIT
 TEMP="$(getopt -o :hpgf: -l help,pixelate,greyscale,font: --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
