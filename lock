@@ -38,9 +38,8 @@ while true ; do
 done
 
 # get path where the script is located to find the lock icon
-pushd $(dirname $0) > /dev/null
-SCRIPTPATH=$(pwd)
-popd > /dev/null
+SCRIPTPATH=$(realpath "$0")
+SCRIPTPATH=${SCRIPTPATH%/*}
 
 # l10n support
 TEXT="Type password to unlock"
