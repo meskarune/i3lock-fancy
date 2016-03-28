@@ -8,12 +8,20 @@ EFFECT="-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%"
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
 IMAGE="$(mktemp).png"
 
+OPTIONS="Options:
+    -h, --help   This help menu.
+    -g, --greyscale  Set background to greyscale instead of color.
+    -p, --pixelate   Pixelate the background instead of blur, runs faster.
+    -f <fontname>, --font <fontname>  Set a custom font. Type 'convert -list font' in a terminal to get a list."
+
 set -o errexit -o noclobber -o nounset -o pipefail
-TEMP="$(getopt -o pgf: -l pixelate,greyscale,font: --name "$0" -- "$@")"
+TEMP="$(getopt -o :hpgf: -l help,pixelate,greyscale,font: --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
 while true ; do
     case "$1" in
+        -h|--help)
+            printf "Usage: $(basename $0) [options]\n\n$OPTIONS\n\n" ; exit 1 ;;
         -g|--greyscale) HUE="-level 0%,100%,0.6 -set colorspace Gray -separate -average" ; shift ;;
         -p|--pixelate) EFFECT="-scale 10% -scale 1000%" ; shift ;;
         -f|--font)
@@ -25,9 +33,6 @@ while true ; do
         *) echo "error" ; exit 1 ;;
     esac
 done
-
-# Set your own font. List with "convert list font" in a terminal
-#FONT="Noto-Sans"
 
 # get path where the script is located to find the lock icon
 pushd $(dirname $0) > /dev/null
