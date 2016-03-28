@@ -41,7 +41,7 @@ popd > /dev/null
 
 # l10n support
 TEXT="Type password to unlock"
-case $LANG in
+case "$LANG" in
     de_* ) TEXT="Bitte Passwort eingeben" ;; # Deutsch
     en_* ) TEXT="Type password to unlock" ;; # English
     es_* ) TEXT="Ingrese su contraseña" ;; # Española
@@ -50,34 +50,34 @@ case $LANG in
 esac
 
 VALUE="60" #brightness value to compare to
-scrot -z $IMAGE
-COLOR=$(convert $IMAGE -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
+scrot -z "$IMAGE"
+COLOR=$(convert "$IMAGE" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
     -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
     BW="black"
     ICON="$SCRIPTPATH/lockdark.png"
-    PARAM='--textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e \
+    PARAM=(--textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e \
         --linecolor=00000000 --keyhlcolor=ffffff80 --ringvercolor=ffffff00 \
         --separatorcolor=22222260 --insidevercolor=ffffff1c \
-        --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c'
+        --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c)
 else #black
     BW="white"
     ICON="$SCRIPTPATH/lock.png"
-    PARAM='--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
+    PARAM=(--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
         --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 \
         --separatorcolor=22222260 --insidevercolor=0000001c \
-        --ringwrongcolor=00000055 --insidewrongcolor=0000001c'
+        --ringwrongcolor=00000055 --insidewrongcolor=0000001c)
 fi
 
-convert $IMAGE $HUE $EFFECT -font $FONT -pointsize 26 -fill $BW -gravity center \
-    -annotate +0+160 "$TEXT" $ICON -gravity center -composite $IMAGE
+convert "$IMAGE" "$HUE" "$EFFECT" -font "$FONT" -pointsize 26 -fill "$BW" -gravity center \
+    -annotate +0+160 "$TEXT" "$ICON" -gravity center -composite "$IMAGE"
 
 # try to use a forked version of i3lock with prepared parameters
-i3lock $PARAM -i $IMAGE > /dev/null 2>&1
+i3lock "${PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1
 
 if [ $? -ne 0 ]; then
     # We have failed, lets get back to stock one
-    i3lock -i $IMAGE
+    i3lock -i "$IMAGE"
 fi
 
-rm $IMAGE
+rm "$IMAGE"
