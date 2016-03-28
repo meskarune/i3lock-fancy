@@ -51,11 +51,8 @@ esac
 
 VALUE="60" #brightness value to compare to
 scrot -z $IMAGE
-COLOR=`convert $IMAGE -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
-       -resize 1x1 txt:- | sed -E '/.*$/ {
-                             N
-                             s/.*\n.*([0-9]{1,2}[^\.])\.[0-9]+%\)$/\1/
-                             }'`;
+COLOR=$(convert $IMAGE -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
+    -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
     BW="black"
     ICON="$SCRIPTPATH/lockdark.png"
