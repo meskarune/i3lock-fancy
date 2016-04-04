@@ -79,14 +79,15 @@ do
         H=${BASH_REMATCH[2]}
         Xoff=${BASH_REMATCH[3]}
         Yoff=${BASH_REMATCH[4]}
-        MIDX=$(($W / 2 + $Xoff - 60  / 2))
-        MIDY=$(($H / 2 + $Yoff - 60  / 2))
-        LOCK+=($ICON -geometry +$MIDX+$MIDY -composite)
+        MIDXi=$(($W / 2 + $Xoff - 60  / 2))
+        MIDYi=$(($H / 2 + $Yoff - 60  / 2))
+        MIDXt=$(($W / 2 + $Xoff - 280 / 2))
+        MIDYt=$(($H / 2 + $Yoff + 320 / 2))
+        LOCK+=(-font $FONT -pointsize 26 -fill $BW -annotate +$MIDXt+$MIDYt "$TEXT" $ICON -geometry +$MIDXi+$MIDYi -composite)
     fi
 done <<<"$(xrandr)"
 
-convert "$IMAGE" "${HUE[@]}" "${EFFECT[@]}" -font "$FONT" -pointsize 26 -fill "$BW" \
-    -annotate +0+160 "$TEXT" "${LOCK[@]}" "$IMAGE"
+convert "$IMAGE" "${HUE[@]}" "${EFFECT[@]}" "${LOCK[@]}" "$IMAGE"
 
 # try to use a forked version of i3lock with prepared parameters
 if ! i3lock -n "${PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1; then
