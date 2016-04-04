@@ -71,8 +71,22 @@ else #black
         --ringwrongcolor=00000055 --insidewrongcolor=0000001c)
 fi
 
-convert "$IMAGE" "${HUE[@]}" "${EFFECT[@]}" -font "$FONT" -pointsize 26 -fill "$BW" -gravity center \
-    -annotate +0+160 "$TEXT" "$ICON" -gravity center -composite "$IMAGE"
+LOCK=()
+while read LINE
+do
+    if [[ "$LINE" =~ ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) ]]; then
+        W=${BASH_REMATCH[1]}
+        H=${BASH_REMATCH[2]}
+        Xoff=${BASH_REMATCH[3]}
+        Yoff=${BASH_REMATCH[4]}
+        MIDX=$(($W / 2 + $Xoff - 60  / 2))
+        MIDY=$(($H / 2 + $Yoff - 60  / 2))
+        LOCK+=($ICON -geometry +$MIDX+$MIDY -composite)
+    fi
+done <<<"$(xrandr)"
+
+convert "$IMAGE" "${HUE[@]}" "${EFFECT[@]}" -font "$FONT" -pointsize 26 -fill "$BW" \
+    -annotate +0+160 "$TEXT" "${LOCK[@]}" "$IMAGE"
 
 # try to use a forked version of i3lock with prepared parameters
 if ! i3lock -n "${PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1; then
