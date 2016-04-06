@@ -51,7 +51,6 @@ case "$LANG" in
     pl_* ) TEXT="Podaj hasło" ;; # Polish
 esac
 
-VALUE="60" #brightness value to compare to
 scrot -z "$IMAGE"
 ICON="$SCRIPTPATH/lock.png"
 PARAM=(--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
