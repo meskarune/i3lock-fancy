@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#/!/usr/bin/env bash
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
 # Dependencies: imagemagick, i3lock-color-git, scrot
 set -o errexit -o noclobber -o nounset
@@ -53,23 +53,11 @@ esac
 
 VALUE="60" #brightness value to compare to
 scrot -z "$IMAGE"
-COLOR=$(convert "$IMAGE" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
-    -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
-if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
-    BW="black"
-    ICON="$SCRIPTPATH/lockdark.png"
-    PARAM=(--textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e \
-        --linecolor=00000000 --keyhlcolor=ffffff80 --ringvercolor=ffffff00 \
-        --separatorcolor=22222260 --insidevercolor=ffffff1c \
-        --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c)
-else #black
-    BW="white"
-    ICON="$SCRIPTPATH/lock.png"
-    PARAM=(--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
-        --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 \
-        --separatorcolor=22222260 --insidevercolor=0000001c \
-        --ringwrongcolor=00000055 --insidewrongcolor=0000001c)
-fi
+ICON="$SCRIPTPATH/lock.png"
+PARAM=(--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
+       --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 \
+       --separatorcolor=22222260 --insidevercolor=0000001c \
+       --ringwrongcolor=00000055 --insidewrongcolor=0000001c)
 
 LOCK=()
 while read LINE
@@ -81,9 +69,12 @@ do
         Yoff=${BASH_REMATCH[4]}
         MIDXi=$(($W / 2 + $Xoff - 60  / 2))
         MIDYi=$(($H / 2 + $Yoff - 60  / 2))
-        MIDXt=$(($W / 2 + $Xoff - 280 / 2))
+        MIDXt=$(($W / 2 + $Xoff - 285 / 2))
         MIDYt=$(($H / 2 + $Yoff + 320 / 2))
-        LOCK+=(-font $FONT -pointsize 26 -fill $BW -annotate +$MIDXt+$MIDYt "$TEXT" $ICON -geometry +$MIDXi+$MIDYi -composite)
+        LOCK+=(-font $FONT -pointsize 26 -fill lightgrey -stroke grey40 \
+               -strokewidth 2 -annotate +$MIDXt+$MIDYt "$TEXT" \
+               -fill lightgrey -stroke lightgrey -strokewidth 1 -annotate +$MIDXt+$MIDYt "$TEXT" \
+               $ICON -geometry +$MIDXi+$MIDYi -composite)
     fi
 done <<<"$(xrandr)"
 
