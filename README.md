@@ -59,3 +59,11 @@ Systemd Unit file (edit for your own use):
     
     [Install]
     WantedBy=graphical.target
+
+Multiple Monitors
+-----------------
+There is a branch called dual monitor with support for multiple monitors. This
+branch uses a grey icon and text with outlines to make it visible on light and
+dark backgrounds (though it looks better on dark backgrounds). I am still
+working to get it looking just right right. The script is usable now, but it's
+under developement and things may change.
