@@ -71,7 +71,7 @@ do
         MIDXt=$(($W / 2 + $Xoff - 285 / 2))
         MIDYt=$(($H / 2 + $Yoff + 320 / 2))
         LOCK+=(-font $FONT -pointsize 26 -fill lightgrey -stroke grey10 \
-               -strokewidth 2 -annotate +$MIDXt+$MIDYt "$TEXT" -blur 0x4 \
+               -strokewidth 2 -annotate +$MIDXt+$MIDYt "$TEXT" -blur 0x2 \
                -fill lightgrey -stroke lightgrey -strokewidth 1 -annotate +$MIDXt+$MIDYt "$TEXT" \
                $ICON -geometry +$MIDXi+$MIDYi -composite)
     fi
