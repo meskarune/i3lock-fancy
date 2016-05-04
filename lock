@@ -13,12 +13,15 @@ OPTIONS="Options:
     -h, --help   This help menu.
     -g, --greyscale  Set background to greyscale instead of color.
     -p, --pixelate   Pixelate the background instead of blur, runs faster.
-    -f <fontname>, --font <fontname>  Set a custom font. Type 'convert -list font' in a terminal to get a list."
+    -f <fontname>, --font <fontname>  Set a custom font.
+    -l, --listfonts  Display a list of possible fonts for use with -f/--font.
+                     Note: this option will not lock the screen, it displays
+                     the list and exits immediately."
 
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$IMAGE"' EXIT
-TEMP="$(getopt -o :hpgf: -l help,pixelate,greyscale,font: --name "$0" -- "$@")"
+TEMP="$(getopt -o :hpglf: -l help,pixelate,greyscale,font: --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
 while true ; do
@@ -32,6 +35,7 @@ while true ; do
                 "") shift 2 ;;
                 *) FONT=$2 ; shift 2 ;;
             esac ;;
+        -l|--listfonts) convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | ${PAGER:-less} ; exit 0 ;;
         --) shift ; break ;;
         *) echo "error" ; exit 1 ;;
     esac
