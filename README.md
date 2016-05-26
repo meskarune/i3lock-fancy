@@ -1,10 +1,13 @@
-i3lock-fancy
+no3lock-fancy
 ============
 
 This is an i3lock bash script that takes a screenshot of the desktop, blurs the background and adds a No-meme icon :)
+I removed all the other icons and features I don't use (grayscale, etc).
 
 This is a fork of i3lock-fancy:
-website: [github pages website](http://meskarune.github.io/i3lock-fancy/)
+[github pages website](http://meskarune.github.io/i3lock-fancy/)
+
+![screenshot](https://raw.githubusercontent.com/hallgat89/no3lock-fancy/master/screenshot.jpeg)
 
 Dependancies
 ------------
