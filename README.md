@@ -9,7 +9,7 @@ This is a fork of i3lock-fancy:
 
 ![screenshot](https://raw.githubusercontent.com/hallgat89/no3lock-fancy/master/screenshot.jpeg)
 
-Dependancies
+Dependencies
 ------------
 * <s>[i3lock-color-git](https://github.com/eBrnd/i3lock-color)</s>
 * [i3lock-color-git](https://github.com/Arcaena/i3lock-color) - this is a fork of i3lock-color that is kept up to date with i3lock
