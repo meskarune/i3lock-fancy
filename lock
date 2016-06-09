@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
-# Dependencies: imagemagick, i3lock-color-git, scrot
+# Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional)
 set -o errexit -o noclobber -o nounset
 
 HUE=(-level 0%,100%,0.6)
@@ -8,9 +8,11 @@ EFFECT=(-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%)
 # default system sans-serif font
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
 IMAGE="$(mktemp).png"
+DESKTOP=""
 
 OPTIONS="Options:
     -h, --help   This help menu.
+    -d, --desktop    Attempt to minimize all windows before locking.
     -g, --greyscale  Set background to greyscale instead of color.
     -p, --pixelate   Pixelate the background instead of blur, runs faster.
     -f <fontname>, --font <fontname>  Set a custom font.
@@ -21,13 +23,14 @@ OPTIONS="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$IMAGE"' EXIT
-TEMP="$(getopt -o :hpglf: -l help,pixelate,greyscale,font: --name "$0" -- "$@")"
+TEMP="$(getopt -o :hdpglf: -l help,pixelate,greyscale,font: --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
 while true ; do
     case "$1" in
         -h|--help)
             printf "Usage: $(basename $0) [options]\n\n$OPTIONS\n\n" ; exit 1 ;;
+        -d|--desktop) DESKTOP=$(which wmctrl) ; shift ;;
         -g|--greyscale) HUE=(-level 0%,100%,0.6 -set colorspace Gray -separate -average) ; shift ;;
         -p|--pixelate) EFFECT=(-scale 10% -scale 1000%) ; shift ;;
         -f|--font)
@@ -79,8 +82,16 @@ fi
 convert "$IMAGE" "${HUE[@]}" "${EFFECT[@]}" -font "$FONT" -pointsize 26 -fill "$BW" -gravity center \
     -annotate +0+160 "$TEXT" "$ICON" -gravity center -composite "$IMAGE"
 
+# If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
+# the desktop) before locking.
+${DESKTOP} ${DESKTOP:+-k on}
+
 # try to use a forked version of i3lock with prepared parameters
 if ! i3lock -n "${PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1; then
     # We have failed, lets get back to stock one
     i3lock -n -i "$IMAGE"
 fi
+
+# As above, if we were passed -d/--desktop, we'll attempt to restore all windows
+# after unlocking.
+${DESKTOP} ${DESKTOP:+-k off}
