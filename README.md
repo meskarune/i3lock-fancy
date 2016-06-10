@@ -7,7 +7,7 @@ website: [github pages website](http://meskarune.github.io/i3lock-fancy/)
 
 ![screen shot of lockscreen](https://raw.githubusercontent.com/meskarune/i3lock-fancy/master/screenshot.png)
 
-Dependancies
+Dependencies
 ------------
 * <s>[i3lock-color-git](https://github.com/eBrnd/i3lock-color)</s>
 * [i3lock-color-git](https://github.com/Arcaena/i3lock-color) - this is a fork of i3lock-color that is kept up to date with i3lock
