@@ -9,6 +9,7 @@ EFFECT=(-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%)
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
 IMAGE="$(mktemp).png"
 DESKTOP=""
+SCREENSHOT_DELAY=0
 
 OPTIONS="Options:
     -h, --help   This help menu.
@@ -16,6 +17,8 @@ OPTIONS="Options:
     -g, --greyscale  Set background to greyscale instead of color.
     -p, --pixelate   Pixelate the background instead of blur, runs faster.
     -f <fontname>, --font <fontname>  Set a custom font.
+    -s <delay>, --screenshot-delay <delay> Set a delay (in seconds) before
+                                           taking the screenshot.
     -l, --listfonts  Display a list of possible fonts for use with -f/--font.
                      Note: this option will not lock the screen, it displays
                      the list and exits immediately."
@@ -23,7 +26,7 @@ OPTIONS="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$IMAGE"' EXIT
-TEMP="$(getopt -o :hdpglf: -l help,pixelate,greyscale,font: --name "$0" -- "$@")"
+TEMP="$(getopt -o :hdpglf:s: -l help,pixelate,greyscale,font:,screenshot-delay: --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
 while true ; do
@@ -38,6 +41,7 @@ while true ; do
                 "") shift 2 ;;
                 *) FONT=$2 ; shift 2 ;;
             esac ;;
+        -s|--screenshot-delay) SCREENSHOT_DELAY=$2 ; shift 2 ;;
         -l|--listfonts) convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | ${PAGER:-less} ; exit 0 ;;
         --) shift ; break ;;
         *) echo "error" ; exit 1 ;;
@@ -60,6 +64,9 @@ case "$LANG" in
 esac
 
 VALUE="60" #brightness value to compare to
+
+sleep $SCREENSHOT_DELAY
+
 scrot -z "$IMAGE"
 COLOR=$(convert "$IMAGE" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
     -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
