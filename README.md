@@ -40,25 +40,32 @@ example: ```lock -gpf Comic-Sans-MS```
 Extras
 ------
 
-The lock screen in action:
+### The lock screen in action
 
 ![lockscreen animation](https://raw.githubusercontent.com/meskarune/i3lock-fancy/master/action.gif)
 
 Use this with xautolock to automatically lock the screen after a set time.
 
-Systemd Unit file (edit for your own use):
+### Systemd Unit file
+
+Edit for your own use.
 
     [Unit]
     Description=Lock the screen automatically after a timeout
-    
+
     [Service]
     Type=simple
     User=meskarune
     Environment=DISPLAY=:0
     ExecStart=/usr/bin/xautolock -time 5 -locker /usr/local/bin/lock/lock -detectsleep
-    
+
     [Install]
     WantedBy=graphical.target
+
+### When using a run dialog (Rofi, dmenu)
+When using a run dialog to lock the screen, the dialog ends up in the
+background screenshot. To avoid this, specify a delay before taking the
+screenshot by using the `-s|--screenshot-delay` option.
 
 Multiple Monitors
 -----------------
