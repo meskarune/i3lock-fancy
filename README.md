@@ -6,7 +6,7 @@ i3lock script that takes desktop screenshot, blurs and darken the background and
 Update: New version uses ffmpeg instead of scrot and imagemagick. Thanks to [/u/edijatszik](https://www.reddit.com/r/unixporn/comments/4yj29e/i3lock_simple_blur_script/) ([Github link](https://github.com/petvas/i3lock-blur)). The way I darken the background is a bit cheaty but it works. There is probably a better way.
 
 Depends:
-* [i3lock-color-git](https://github.com/eBrnd/i3lock-color)
+* [i3lock-color-git](https://github.com/Arcaena/i3lock-color)
 * ffmpeg
 * Digital Tech font (included)
 
