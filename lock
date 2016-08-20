@@ -9,9 +9,9 @@ TEXT="type_password_to_unlock"
 SCRIPT=`realpath $0`
 SCRIPTPATH=`dirname $SCRIPT`
 LOCK=$SCRIPTPATH/lock.png
-RES=1440x900
+RES=$(xrandr --current | grep '*' | uniq | awk '{print $1}')
 #This is a bit cheaty
-BOXSIZE=720
+BOXSIZE=$(expr $(echo $RES | cut -d 'x' -f1) / 2)
 
 if [[ $1 != "" ]]; then
     TEXT=$1
