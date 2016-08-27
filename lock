@@ -1,11 +1,11 @@
 #!/bin/bash
- 
+
 # Dependencies:
 # ffmpeg
 # i3lock-color-git
- 
+
 IMAGE=/tmp/i3lock.png
-TEXT="type_password_to_unlock"
+TEXT="locked"
 SCRIPT=`realpath $0`
 SCRIPTPATH=`dirname $SCRIPT`
 LOCK=$SCRIPTPATH/lock.png
