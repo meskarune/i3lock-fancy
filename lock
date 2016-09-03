@@ -57,6 +57,7 @@ case "$LANG" in
     fr_* ) TEXT="Entrez votre mot de passe" ;; # Français
     pl_* ) TEXT="Podaj hasło" ;; # Polish
     it_* ) TEXT="Inserisci la password" ;; # Italian
+    pt_* ) TEXT="Digite a senha para desbloquear" ;; # Portuguese
 esac
 
 VALUE="60" #brightness value to compare to
