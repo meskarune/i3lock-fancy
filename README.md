@@ -21,7 +21,7 @@ Installation
 ------------
 Arch Linux Package: https://aur.archlinux.org/packages/i3lock-fancy-git/
 
-git clone the repository and copy lock, lock.png and lockdark.png to
+git clone the repository and copy lock and icons/ to
 "/usr/local/bin"
 
 Usage
