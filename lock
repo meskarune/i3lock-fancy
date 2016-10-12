@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
-# Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional)
+# Dependencies: imagemagick, i3lock-color-git, wmctrl (optional)
 set -o errexit -o noclobber -o nounset
 
 HUE=(-level 0%,100%,0.6)
@@ -60,7 +60,7 @@ case "$LANG" in
 esac
 
 VALUE="60" #brightness value to compare to
-scrot -z "$IMAGE"
+import -window root "$IMAGE"
 COLOR=$(convert "$IMAGE" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
     -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
