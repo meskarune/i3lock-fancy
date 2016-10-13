@@ -7,6 +7,7 @@ HUE=(-level 0%,100%,0.6)
 EFFECT=(-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%)
 # default system sans-serif font
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
+SHOT=(import -window root)
 IMAGE="$(mktemp).png"
 DESKTOP=""
 
@@ -19,12 +20,15 @@ OPTIONS="Options:
     -t <text>, --text <text> Set a custom text prompt.
     -l, --listfonts  Display a list of possible fonts for use with -f/--font.
                      Note: this option will not lock the screen, it displays
-                     the list and exits immediately."
+                     the list and exits immediately.
+    -s, --screenshot Set command to use for taking a screenshot. Default is
+                     `import -window root`. Using `scrot -z` or `maim` will
+                     increase speed and allow setting a delay with -d."
 
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$IMAGE"' EXIT
-TEMP="$(getopt -o :hdpglt:f: -l help,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
+TEMP="$(getopt -o :hdpglt:s:f: -l help,pixelate,greyscale,text:,screenshot:,font: --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
 # l10n support
@@ -55,6 +59,7 @@ while true ; do
             esac ;;
         -t|--text) TEXT=$2 ; shift 2 ;;
         -l|--listfonts) convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | ${PAGER:-less} ; exit 0 ;;
+        -s|--screenshot) SHOT=$2 ; shift 2 ;;
         --) shift ; break ;;
         *) echo "error" ; exit 1 ;;
     esac
@@ -65,9 +70,11 @@ SCRIPTPATH=$(realpath "$0")
 SCRIPTPATH=${SCRIPTPATH%/*}
 
 VALUE="60" #brightness value to compare to
-scrot -z "$IMAGE"
+$SHOT $IMAGE
+
 COLOR=$(convert "$IMAGE" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
     -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
+
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
     BW="black"
     ICON="$SCRIPTPATH/lockdark.png"
