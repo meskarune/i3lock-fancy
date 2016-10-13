@@ -29,8 +29,8 @@ OPTIONS="Options:
                      the list and exits immediately.
 
     --               Must be last option. Set command to use for taking a
-                     screenshot. Default is`import -window root`. Using `scrot`
-                     or `maim` will increase script speed and allow setting
+                     screenshot. Default is 'import -window root'. Using 'scrot'
+                     or 'maim' will increase script speed and allow setting
                      custom flags like haing a delay."
 
 # move pipefail down as for some reason "convert -list font" returns 1
