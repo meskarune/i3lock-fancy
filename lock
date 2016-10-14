@@ -11,19 +11,20 @@ IMAGE="$(mktemp).png"
 DESKTOP=""
 
 OPTIONS="Options:
-    -h, --help   This help menu.
-    -d, --desktop    Attempt to minimize all windows before locking.
-    -g, --greyscale  Set background to greyscale instead of color.
-    -p, --pixelate   Pixelate the background instead of blur, runs faster.
-    -f <fontname>, --font <fontname>  Set a custom font.
-    -l, --listfonts  Display a list of possible fonts for use with -f/--font.
-                     Note: this option will not lock the screen, it displays
-                     the list and exits immediately."
+    -h, --help		This help menu.
+    -d, --desktop	Attempt to minimize all windows before locking.
+    -g, --greyscale	Set background to greyscale instead of color.
+    -p, --pixelate	Pixelate the background instead of blur, runs faster.
+    -f <fontname>, --font <fontname>	Set a custom font.
+    -l, --listfonts	Display a list of possible fonts for use with -f/--font.
+			Note: this option will not lock the screen, it displays
+			the list and exits immediately.
+    -r, --random	Display a random joke/quote from random.txt"	
 
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$IMAGE"' EXIT
-TEMP="$(getopt -o :hdpglf:j -l help,desktop,pixelate,greyscale,listfonts,font:,jokes --name "$0" -- "$@")"
+TEMP="$(getopt -o :hdpglf:r -l help,desktop,pixelate,greyscale,listfonts,font:,random --name "$0" -- "$@")" 
 eval set -- "$TEMP"
 
 while true ; do
@@ -39,7 +40,7 @@ while true ; do
                 *) FONT=$2 ; shift 2 ;;
             esac ;;
         -l|--listfonts) convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | ${PAGER:-less} ; exit 0 ;;
-        -j|--jokes) JOKE=true ; shift ;;
+        -r|--random) RANDOM=true ; shift ;;
         --) shift ; break ;;
         *) echo "error" ; exit 1 ;;
     esac
@@ -49,7 +50,7 @@ done
 SCRIPTPATH=$(realpath "$0")
 SCRIPTPATH=${SCRIPTPATH%/*}
 
-if [ -z "${JOKE+a}" ] ; then # If $JOKE is not set
+if [ -z "${RANDOM+x}" ] ; then # If $RANDOM is not set
     TEXT="Type password to unlock"
     # l10n support
     case "$LANG" in
@@ -61,7 +62,7 @@ if [ -z "${JOKE+a}" ] ; then # If $JOKE is not set
         it_* ) TEXT="Inserisci la password" ;; # Italian
     esac
 else
-    TEXT=$(shuf -n 1 $SCRIPTPATH/jokes.txt)
+    TEXT=$(shuf -n 1 $SCRIPTPATH/random.txt)
 fi
 
 VALUE="60" #brightness value to compare to
