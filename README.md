@@ -12,35 +12,52 @@ Dependencies
 * <s>[i3lock-color-git](https://github.com/eBrnd/i3lock-color)</s>
 * [i3lock-color-git](https://github.com/Arcaena/i3lock-color) - this is a fork of i3lock-color that is kept up to date with i3lock
 * imagemagick
-* scrot
 * bash
 * awk
 * utils-linux
+
+Optional Dependencies
+---------------------
+* wmctrl
+* a screenshot utility such as scrot or maim.
 
 Installation
 ------------
 Arch Linux Package: https://aur.archlinux.org/packages/i3lock-fancy-git/
 
-git clone the repository and copy lock and icons/ to
-"/usr/local/bin"
+git clone the repository and copy lock and /icons to "/usr/local/bin"
 
 Usage
 -----
 
     lock [options]
+    
+    Options:
+        -h, --help       This help menu.
+    
+        -d, --desktop    Attempt to minimize all windows before locking. Requires wmctrl.
+    
+        -g, --greyscale  Set background to greyscale instead of color.
+    
+        -p, --pixelate   Pixelate the background instead of blur, runs faster.
+    
+        -f <fontname>, --font <fontname>  Set a custom font.
+    
+        -t <text>, --text <text> Set a custom text prompt.
+    
+        -l, --listfonts  Display a list of possible fonts for use with -f/--font.
+                         Note: this option will not lock the screen, it displays
+                         the list and exits immediately.
+    
+        -r, --random     Display a random joke/quote from random.txt
+        
+        --               Must be last option. Set command to use for taking a
+                         screenshot. Default is 'import -window root'. Using 'scrot'
+                         or 'maim' will increase script speed and allow setting
+                         custom flags like haing a delay.
+>>>>>>> upstream/master
 
-	Options:
-		-h, --help		This help menu.
-		-d, --desktop	Attempt to minimize all windows before locking.
-		-g, --greyscale	Set background to greyscale instead of color.
-		-p, --pixelate	Pixelate the background instead of blur, runs faster.
-		-f <fontname>, --font <fontname>	Set a custom font.
-		-l, --listfonts	Display a list of possible fonts for use with -f/--font.
-				Note: this option will not lock the screen, it displays
-				the list and exits immediately.
-		-r, --random	Display a random joke/quote from random.txt
-
-example: ```lock -gpf Comic-Sans-MS```
+example: ```lock -gpf Comic-Sans-MS -- scrot -z```
 
 Extras
 ------
@@ -49,9 +66,13 @@ The lock screen in action:
 
 ![lockscreen animation](https://raw.githubusercontent.com/meskarune/i3lock-fancy/master/action.gif)
 
-Use this with xautolock to automatically lock the screen after a set time.
+To use this script you can set a hotkey in your window manager to run the lock command,
+set xautolock to run at boot, or use a systemd script to either lock on suspend or run xautolock.
 
-Systemd Unit file (edit for your own use):
+xautolock is a utility to automatically lock the screen after a set time. It also 
+supports hot corners.
+
+Systemd Unit file example (edit for your own use):
 
     [Unit]
     Description=Lock the screen automatically after a timeout

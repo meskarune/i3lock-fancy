@@ -8,24 +8,53 @@ EFFECT=(-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%)
 # default system sans-serif font
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
 IMAGE="$(mktemp).png"
+SHOT=(import -window root)
 DESKTOP=""
 
 OPTIONS="Options:
-    -h, --help		This help menu.
-    -d, --desktop	Attempt to minimize all windows before locking.
-    -g, --greyscale	Set background to greyscale instead of color.
-    -p, --pixelate	Pixelate the background instead of blur, runs faster.
-    -f <fontname>, --font <fontname>	Set a custom font.
-    -l, --listfonts	Display a list of possible fonts for use with -f/--font.
-			Note: this option will not lock the screen, it displays
-			the list and exits immediately.
-    -r, --random	Display a random joke/quote from random.txt"	
+    
+    -h, --help       This help menu.
+
+    -d, --desktop    Attempt to minimize all windows before locking.
+
+    -g, --greyscale  Set background to greyscale instead of color.
+
+    -p, --pixelate   Pixelate the background instead of blur, runs faster.
+
+    -f <fontname>, --font <fontname>  Set a custom font.
+
+    -t <text>, --text <text> Set a custom text prompt.
+
+    -l, --listfonts  Display a list of possible fonts for use with -f/--font.
+                     Note: this option will not lock the screen, it displays
+                     the list and exits immediately.
+
+    -r, --random	Display a random joke/quote from random.txt
+
+    --               Must be last option. Set command to use for taking a
+                     screenshot. Default is 'import -window root'. Using 'scrot'
+                     or 'maim' will increase script speed and allow setting
+                     custom flags like haing a delay."
 
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$IMAGE"' EXIT
-TEMP="$(getopt -o :hdpglf:r -l help,desktop,pixelate,greyscale,listfonts,font:,random --name "$0" -- "$@")" 
+TEMP="$(getopt -o :hdpglt:s:f:r -l help,pixelate,greyscale,text:,screenshot:,font:,random --name "$0" -- "$@")"
 eval set -- "$TEMP"
+
+# l10n support
+TEXT="Type password to unlock"
+case "$LANG" in
+    de_* ) TEXT="Bitte Passwort eingeben" ;; # Deutsch
+    en_* ) TEXT="Type password to unlock" ;; # English
+    es_* ) TEXT="Ingrese su contraseña" ;; # Española
+    fr_* ) TEXT="Entrez votre mot de passe" ;; # Français
+    it_* ) TEXT="Inserisci la password" ;; # Italian
+    pl_* ) TEXT="Podaj hasło" ;; # Polish
+    pt_* ) TEXT="Digite a senha para desbloquear" ;; # Português
+    ru_* ) TEXT="Введите пароль" ;; # Russian
+    * ) TEXT="Type password to unlock" ;; # Default to English
+esac
 
 while true ; do
     case "$1" in
@@ -39,12 +68,19 @@ while true ; do
                 "") shift 2 ;;
                 *) FONT=$2 ; shift 2 ;;
             esac ;;
+        -t|--text) TEXT=$2 ; shift 2 ;;
         -l|--listfonts) convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | ${PAGER:-less} ; exit 0 ;;
         -r|--random) RANDOM=true ; shift ;;
-        --) shift ; break ;;
+        --) shift; SET=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
 done
+
+if "$SET" && [[ $# -gt 0 ]]; then
+    SHOT=("$@");
+fi
+
+"${SHOT[@]}" "$IMAGE"
 
 # get path where the script is located to find the lock icon
 SCRIPTPATH=$(realpath "$0")
@@ -66,9 +102,10 @@ else
 fi
 
 VALUE="60" #brightness value to compare to
-scrot -z "$IMAGE"
+
 COLOR=$(convert "$IMAGE" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
     -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
+
 if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
     BW="black"
     ICON="$SCRIPTPATH/icons/lockdark.png"
