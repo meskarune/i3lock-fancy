@@ -29,11 +29,16 @@ Usage
 
     lock [options]
 
-    Options:
-        -h, --help   This help menu.
-        -g, --greyscale  Set background to greyscale instead of color.
-        -p, --pixelate   Pixelate the background instead of blur, runs faster.
-        -f <fontname>, --font <fontname>  Set a custom font. Type 'convert -list font' in a terminal to get a list.
+	Options:
+		-h, --help		This help menu.
+		-d, --desktop	Attempt to minimize all windows before locking.
+		-g, --greyscale	Set background to greyscale instead of color.
+		-p, --pixelate	Pixelate the background instead of blur, runs faster.
+		-f <fontname>, --font <fontname>	Set a custom font.
+		-l, --listfonts	Display a list of possible fonts for use with -f/--font.
+				Note: this option will not lock the screen, it displays
+				the list and exits immediately.
+		-r, --random	Display a random joke/quote from random.txt
 
 example: ```lock -gpf Comic-Sans-MS```
 
