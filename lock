@@ -10,6 +10,7 @@ FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%
 IMAGE="$(mktemp).png"
 SHOT=(import -window root)
 DESKTOP=""
+INDICATOR=""
 
 OPTIONS="Options:
     -h, --help       This help menu.
@@ -27,7 +28,9 @@ OPTIONS="Options:
     -l, --listfonts  Display a list of possible fonts for use with -f/--font.
                      Note: this option will not lock the screen, it displays
                      the list and exits immediately.
-
+    
+    -u, --no-unlock-indicator  Disable the unlock indicator.
+    
     --               Must be last option. Set command to use for taking a
                      screenshot. Default is 'import -window root'. Using 'scrot'
                      or 'maim' will increase script speed and allow setting
@@ -36,7 +39,7 @@ OPTIONS="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$IMAGE"' EXIT
-TEMP="$(getopt -o :hdpglt:s:f: -l help,pixelate,greyscale,text:,screenshot:,font: --name "$0" -- "$@")"
+TEMP="$(getopt -o :hdpgult:s:f: -l help,pixelate,no-unlock-indicator,greyscale,text:,screenshot:,font: --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
 # l10n support
@@ -68,6 +71,7 @@ while true ; do
             esac ;;
         -t|--text) TEXT=$2 ; shift 2 ;;
         -l|--listfonts) convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | ${PAGER:-less} ; exit 0 ;;
+        -u|--no-unlock-indicator) INDICATOR="-u" ; shift ;;  
         --) shift; SET=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
@@ -112,9 +116,9 @@ convert "$IMAGE" "${HUE[@]}" "${EFFECT[@]}" -font "$FONT" -pointsize 26 -fill "$
 ${DESKTOP} ${DESKTOP:+-k on}
 
 # try to use a forked version of i3lock with prepared parameters
-if ! i3lock -n "${PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1; then
+if ! i3lock -n "${PARAM[@]}" -i "$IMAGE" "$INDICATOR" > /dev/null 2>&1; then
     # We have failed, lets get back to stock one
-    i3lock -n -i "$IMAGE"
+    i3lock -n -i "$IMAGE" "$INDICATOR" 
 fi
 
 # As above, if we were passed -d/--desktop, we'll attempt to restore all windows
