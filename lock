@@ -43,6 +43,7 @@ eval set -- "$TEMP"
 TEXT="Type password to unlock"
 case "$LANG" in
     de_* ) TEXT="Bitte Passwort eingeben" ;; # Deutsch
+    da_* ) TEXT="Indtast adgangskode" ;; # Danish
     en_* ) TEXT="Type password to unlock" ;; # English
     es_* ) TEXT="Ingrese su contraseña" ;; # Española
     fr_* ) TEXT="Entrez votre mot de passe" ;; # Français
