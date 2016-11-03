@@ -49,10 +49,13 @@ Usage
                          Note: this option will not lock the screen, it displays
                          the list and exits immediately.
     
+        -r, --random     Display a random joke/quote from random.txt
+        
         --               Must be last option. Set command to use for taking a
                          screenshot. Default is 'import -window root'. Using 'scrot'
                          or 'maim' will increase script speed and allow setting
                          custom flags like haing a delay.
+>>>>>>> upstream/master
 
 example: ```lock -gpf Comic-Sans-MS -- scrot -z```
 

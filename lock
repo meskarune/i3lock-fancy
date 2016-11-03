@@ -12,6 +12,7 @@ SHOT=(import -window root)
 DESKTOP=""
 
 OPTIONS="Options:
+    
     -h, --help       This help menu.
 
     -d, --desktop    Attempt to minimize all windows before locking.
@@ -28,6 +29,8 @@ OPTIONS="Options:
                      Note: this option will not lock the screen, it displays
                      the list and exits immediately.
 
+    -r, --random	Display a random joke/quote from random.txt
+
     --               Must be last option. Set command to use for taking a
                      screenshot. Default is 'import -window root'. Using 'scrot'
                      or 'maim' will increase script speed and allow setting
@@ -36,7 +39,7 @@ OPTIONS="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$IMAGE"' EXIT
-TEMP="$(getopt -o :hdpglt:s:f: -l help,pixelate,greyscale,text:,screenshot:,font: --name "$0" -- "$@")"
+TEMP="$(getopt -o :hdpglt:s:f:r -l help,pixelate,greyscale,text:,screenshot:,font:,random --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
 # l10n support
@@ -68,6 +71,7 @@ while true ; do
             esac ;;
         -t|--text) TEXT=$2 ; shift 2 ;;
         -l|--listfonts) convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | ${PAGER:-less} ; exit 0 ;;
+        -r|--random) RANDOM=true ; shift ;;
         --) shift; SET=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
@@ -82,6 +86,21 @@ fi
 # get path where the script is located to find the lock icon
 SCRIPTPATH=$(realpath "$0")
 SCRIPTPATH=${SCRIPTPATH%/*}
+
+if [ -z "${RANDOM+x}" ] ; then # If $RANDOM is not set
+    TEXT="Type password to unlock"
+    # l10n support
+    case "$LANG" in
+        de_* ) TEXT="Bitte Passwort eingeben" ;; # Deutsch
+        en_* ) TEXT="Type password to unlock" ;; # English
+        es_* ) TEXT="Ingrese su contraseña" ;; # Española
+        fr_* ) TEXT="Entrez votre mot de passe" ;; # Français
+        pl_* ) TEXT="Podaj hasło" ;; # Polish
+        it_* ) TEXT="Inserisci la password" ;; # Italian
+    esac
+else
+    TEXT=$(shuf -n 1 $SCRIPTPATH/random.txt)
+fi
 
 VALUE="60" #brightness value to compare to
 
