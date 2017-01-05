@@ -83,36 +83,79 @@ fi
 SCRIPTPATH=$(realpath "$0")
 SCRIPTPATH=${SCRIPTPATH%/*}
 
-VALUE="60" #brightness value to compare to
+BR_CUTOFF="60" # brightness value to compare to
 
-COLOR=$(convert "$IMAGE" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
-    -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
+DISPLAY_RE="([0-9]+)x([0-9]+)([-+][0-9]+)([-+][0-9]+)"
+IMAGE_RE="([0-9]+)x([0-9]+)"
+CONVERT_PARAMS=""
 
-if [ "$COLOR" -gt "$VALUE" ]; then #white background image and black text
-    BW="black"
-    ICON="$SCRIPTPATH/icons/lockdark.png"
-    PARAM=(--textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e \
-        --linecolor=00000000 --keyhlcolor=ffffff80 --ringvercolor=ffffff00 \
-        --separatorcolor=22222260 --insidevercolor=ffffff1c \
-        --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c)
-else #black
-    BW="white"
-    ICON="$SCRIPTPATH/icons/lock.png"
-    PARAM=(--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
-        --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 \
-        --separatorcolor=22222260 --insidevercolor=0000001c \
-        --ringwrongcolor=00000055 --insidewrongcolor=0000001c)
-fi
+# Get total screen size
+IMAGE_INFO=$(identify $IMAGE)
+[[ $IMAGE_INFO =~ $IMAGE_RE ]]
+IMAGE_WIDTH=${BASH_REMATCH[1]}
+IMAGE_HEIGHT=${BASH_REMATCH[2]}
 
-convert "$IMAGE" "${HUE[@]}" "${EFFECT[@]}" -font "$FONT" -pointsize 26 -fill "$BW" -gravity center \
-    -annotate +0+160 "$TEXT" "$ICON" -gravity center -composite "$IMAGE"
+# Analyse each screen and set ImageMagick options for that screen
+COUNTER=0
+while read LINE
+do
+    if [[ $LINE =~ $DISPLAY_RE ]]; then
+        # Extract information and append some parameters to the ones that will be given to ImageMagick:
+        WIDTH=${BASH_REMATCH[1]}
+        HEIGHT=${BASH_REMATCH[2]}
+        X=${BASH_REMATCH[3]}
+        Y=${BASH_REMATCH[4]}
+        CENTER_X=$(($X+$WIDTH/2))
+        CENTER_Y=$(($Y+$HEIGHT/2))
+        # Calculate difference of this screen’s center vs. overall center
+        DIFF_X=$(($CENTER_X-$IMAGE_WIDTH/2))
+        DIFF_Y=$(($CENTER_Y-$IMAGE_HEIGHT/2))
+
+        COLOR=$(convert "$IMAGE" -gravity Center -crop "100x100+${DIFF_X}+${DIFF_Y}" +repage -colorspace hsb \
+            -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
+
+        if [ "$COLOR" -gt "$BR_CUTOFF" ]; then # white background image and black text
+            BW="black"
+            ICON="$SCRIPTPATH/icons/lockdark.png"
+            if [ $COUNTER = 0 ]; then
+                I3LOCK_PARAM=(--textcolor=00000000 --insidecolor=0000001c --ringcolor=0000003e \
+                    --linecolor=00000000 --keyhlcolor=ffffff80 --ringvercolor=ffffff00 \
+                    --separatorcolor=22222260 --insidevercolor=ffffff1c \
+                    --ringwrongcolor=ffffff55 --insidewrongcolor=ffffff1c)
+            fi
+        else # black
+            BW="white"
+            ICON="$SCRIPTPATH/icons/lock.png"
+            if [ $COUNTER = 0 ]; then
+                I3LOCK_PARAM=(--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
+                    --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 \
+                    --separatorcolor=22222260 --insidevercolor=0000001c \
+                    --ringwrongcolor=00000055 --insidewrongcolor=0000001c)
+            fi
+        fi
+        #Get dimensions of the lock image:
+        ICON_INFO=$(identify $ICON)
+        [[ $ICON_INFO =~ $IMAGE_RE ]]
+        ICON_WIDTH=${BASH_REMATCH[1]}
+        ICON_HEIGHT=${BASH_REMATCH[2]}
+
+        CONVERT_PARAMS="$CONVERT_PARAMS \
+            '-font' '$FONT' '-pointsize' '26' '-fill' '$BW' '-draw' 'gravity Center text $DIFF_X,$(($DIFF_Y+160)) \"$TEXT\"' \
+            '$ICON' '-geometry' '+$(($CENTER_X-$ICON_WIDTH/2))+$(($CENTER_Y-$ICON_HEIGHT/2))' '-composite' "
+
+        COUNTER=$(($COUNTER+1))
+    fi
+done <<<"$(xrandr)"
+
+CONVERT_PARAMS="'$IMAGE' ${HUE[*]} ${EFFECT[*]} $CONVERT_PARAMS '$IMAGE'"
+eval convert $CONVERT_PARAMS
 
 # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
 # the desktop) before locking.
 ${DESKTOP} ${DESKTOP:+-k on}
 
 # try to use a forked version of i3lock with prepared parameters
-if ! i3lock -n "${PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1; then
+if ! i3lock -n "${I3LOCK_PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1; then
     # We have failed, lets get back to stock one
     i3lock -n -i "$IMAGE"
 fi
