@@ -27,6 +27,21 @@ Arch Linux Package: https://aur.archlinux.org/packages/i3lock-fancy-git/
 
 git clone the repository and copy lock and /icons to "/usr/local/bin"
 
+
+Arch Install with yaourt ( Recommended )
+----------------------------------------
+```
+yaourt i3lock-fancy-git
+```
+Select (y) For everything during install
+Then add to .config/i3/config
+```
+bindsym $mod+Shift+z exec i3lock-fancy
+```
+* Note: Keybinding should anything you want
+
+
+
 Usage
 -----
 
