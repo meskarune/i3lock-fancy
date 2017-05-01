@@ -8,8 +8,24 @@ EFFECT=(-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%)
 # default system sans-serif font
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
 IMAGE="$(mktemp).png"
-SHOT=(import -window root)
 DESKTOP=""
+
+# Try to use ffmpeg if available
+if command -v ffmpeg >/dev/null 2>&1; then
+	#Check if xdpyinfo(xorg-utils) available
+	if command -v xdpyinfo >/dev/null 2>&1; then
+		RES=$(xdpyinfo | awk '/dimensions/{print $2}')
+		SHOT=(ffmpeg -y -loglevel 0 -s $RES -f x11grab -i $DISPLAY -vframes 1)
+	#Check if xrandr(xorg-xrandr) available
+	elif command -v xrandr >/dev/null 2>&1; then
+		RES=$(xrandr | awk 'NR==1{p=$8$9$10; print substr(p, 1, length(p)-1)}')
+		SHOT=(ffmpeg -y -loglevel 0 -s $RES -f x11grab -i $DISPLAY -vframes 1)
+	fi
+else
+	SHOT=(import -window root)
+fi
+
+
 
 OPTIONS="Options:
     -h, --help       This help menu.
