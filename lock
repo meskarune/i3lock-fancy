@@ -9,23 +9,22 @@ EFFECT=(-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%)
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
 IMAGE="$(mktemp).png"
 DESKTOP=""
+FORKING=false
 
 # Try to use ffmpeg if available
 if command -v ffmpeg >/dev/null 2>&1; then
-	#Check if xdpyinfo(xorg-utils) available
-	if command -v xdpyinfo >/dev/null 2>&1; then
-		RES=$(xdpyinfo | awk '/dimensions/{print $2}')
-		SHOT=(ffmpeg -y -loglevel 0 -s $RES -f x11grab -i $DISPLAY -vframes 1)
-	#Check if xrandr(xorg-xrandr) available
-	elif command -v xrandr >/dev/null 2>&1; then
-		RES=$(xrandr | awk 'NR==1{p=$8$9$10; print substr(p, 1, length(p)-1)}')
-		SHOT=(ffmpeg -y -loglevel 0 -s $RES -f x11grab -i $DISPLAY -vframes 1)
-	fi
+    #Check if xdpyinfo(xorg-utils) available
+    if command -v xdpyinfo >/dev/null 2>&1; then
+        RES=$(xdpyinfo | awk '/dimensions/{print $2}')
+        SHOT=(ffmpeg -y -loglevel 0 -s $RES -f x11grab -i $DISPLAY -vframes 1)
+    #Check if xrandr(xorg-xrandr) available
+    elif command -v xrandr >/dev/null 2>&1; then
+        RES=$(xrandr | awk 'NR==1{p=$8$9$10; print substr(p, 1, length(p)-1)}')
+        SHOT=(ffmpeg -y -loglevel 0 -s $RES -f x11grab -i $DISPLAY -vframes 1)
+    fi
 else
-	SHOT=(import -window root)
+    SHOT=(import -window root)
 fi
-
-
 
 OPTIONS="Options:
     -h, --help       This help menu.
@@ -35,6 +34,8 @@ OPTIONS="Options:
     -g, --greyscale  Set background to greyscale instead of color.
 
     -p, --pixelate   Pixelate the background instead of blur, runs faster.
+
+    -F, --fork       Use Forked version
 
     -f <fontname>, --font <fontname>  Set a custom font.
 
@@ -52,7 +53,7 @@ OPTIONS="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$IMAGE"' EXIT
-TEMP="$(getopt -o :hdpglt:f: -l desktop,help,listfonts,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
+TEMP="$(getopt -o :hdpgFlt:f: -l desktop,help,listfonts,pixelate,greyscale,fork,text:,font: --name "$0" -- "$@")"
 eval set -- "$TEMP"
 
 # l10n support
@@ -78,6 +79,7 @@ while true ; do
         -d|--desktop) DESKTOP=$(which wmctrl) ; shift ;;
         -g|--greyscale) HUE=(-level 0%,100%,0.6 -set colorspace Gray -separate -average) ; shift ;;
         -p|--pixelate) EFFECT=(-scale 10% -scale 1000%) ; shift ;;
+        -F|--fork) FORKING=true ; shift ;;
         -f|--font)
             case "$2" in
                 "") shift 2 ;;
@@ -128,10 +130,18 @@ convert "$IMAGE" "${HUE[@]}" "${EFFECT[@]}" -font "$FONT" -pointsize 26 -fill "$
 # the desktop) before locking.
 ${DESKTOP} ${DESKTOP:+-k on}
 
-# try to use a forked version of i3lock with prepared parameters
-if ! i3lock -n "${PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1; then
-    # We have failed, lets get back to stock one
-    i3lock -n -i "$IMAGE"
+# non-forked or forked
+if [ "$FORKING" == false ]; then
+    # i3lock with prepared parameters
+    if ! i3lock -n "${PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1; then
+        # We have failed, lets get back to stock one
+        i3lock -n -i "$IMAGE"
+    fi
+else
+    if ! i3lock "${PARAM[@]}" -i "$IMAGE" > /dev/null 2>&1; then
+        # We have failed, lets get back to stock one
+        i3lock -i "$IMAGE"
+    fi
 fi
 
 # As above, if we were passed -d/--desktop, we'll attempt to restore all windows
