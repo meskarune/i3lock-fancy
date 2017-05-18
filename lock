@@ -81,7 +81,7 @@ fi
 "${shot[@]}" "$image"
 
 # get path where the script is located to find the lock icon
-scriptpath=$(realpath "$0")
+scriptpath=$(readlink -f -- "$0")
 scriptpath=${scriptpath%/*}
 
 value="60" #brightness value to compare to
