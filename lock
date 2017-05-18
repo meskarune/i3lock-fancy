@@ -10,6 +10,7 @@ font="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%
 image="$(mktemp).png"
 shot=(import -window root)
 desktop=""
+shot_custom=false
 
 options="Options:
     -h, --help       This help menu.
@@ -71,12 +72,12 @@ while true ; do
         -l|--listfonts)
 	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
 	    exit 0 ;;
-        --) shift; set=true; break ;;
+        --) shift; shot_custom=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
 done
 
-if "$set" && [[ $# -gt 0 ]]; then
+if "$shot_custom" && [[ $# -gt 0 ]]; then
     shot=("$@");
 fi
 
