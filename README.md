@@ -44,10 +44,12 @@ Usage
         -f <fontname>, --font <fontname>  Set a custom font.
     
         -t <text>, --text <text> Set a custom text prompt.
-    
+
         -l, --listfonts  Display a list of possible fonts for use with -f/--font.
                          Note: this option will not lock the screen, it displays
                          the list and exits immediately.
+
+        -n, --nofork     Do not fork i3lock after starting.
     
         --               Must be last option. Set command to use for taking a
                          screenshot. Default is 'import -window root'. Using 'scrot'
