@@ -11,7 +11,7 @@ image="$(mktemp).png"
 shot=(import -window root)
 desktop=""
 
-OPTIONS="Options:
+options="Options:
     -h, --help       This help menu.
 
     -d, --desktop    Attempt to minimize all windows before locking.
@@ -36,8 +36,8 @@ OPTIONS="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$image"' EXIT
-TEMP="$(getopt -o :hdpglt:f: -l desktop,help,listfonts,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
-eval set -- "$TEMP"
+temp="$(getopt -o :hdpglt:f: -l desktop,help,listfonts,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
+eval set -- "$temp"
 
 # l10n support
 text="Type password to unlock"
@@ -58,7 +58,7 @@ esac
 while true ; do
     case "$1" in
         -h|--help)
-            printf "Usage: %s [options]\n\n%s\n\n" "${0##*/}" "$OPTIONS"; exit 1 ;;
+            printf "Usage: %s [options]\n\n%s\n\n" "${0##*/}" "$options"; exit 1 ;;
         -d|--desktop) desktop=$(which wmctrl) ; shift ;;
         -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -separate -average) ; shift ;;
         -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
@@ -69,12 +69,12 @@ while true ; do
             esac ;;
         -t|--text) text=$2 ; shift 2 ;;
         -l|--listfonts) convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | ${PAGER:-less} ; exit 0 ;;
-        --) shift; SET=true; break ;;
+        --) shift; set=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
 done
 
-if "$SET" && [[ $# -gt 0 ]]; then
+if "$set" && [[ $# -gt 0 ]]; then
     shot=("$@");
 fi
 
