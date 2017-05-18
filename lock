@@ -59,7 +59,7 @@ while true ; do
     case "$1" in
         -h|--help)
             printf "Usage: %s [options]\n\n%s\n\n" "${0##*/}" "$options"; exit 1 ;;
-        -d|--desktop) desktop=$(which wmctrl) ; shift ;;
+        -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
         -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -separate -average) ; shift ;;
         -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
         -f|--font)
@@ -68,7 +68,9 @@ while true ; do
                 *) font=$2 ; shift 2 ;;
             esac ;;
         -t|--text) text=$2 ; shift 2 ;;
-        -l|--listfonts) convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | ${PAGER:-less} ; exit 0 ;;
+        -l|--listfonts)
+	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
+	    exit 0 ;;
         --) shift; set=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
@@ -78,7 +80,7 @@ if "$set" && [[ $# -gt 0 ]]; then
     shot=("$@");
 fi
 
-"${shot[@]}" "$image"
+command -- "${shot[@]}" "$image"
 
 # get path where the script is located to find the lock icon
 scriptpath=$(readlink -f -- "$0")
