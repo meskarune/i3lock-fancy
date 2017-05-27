@@ -10,11 +10,11 @@ scriptpath=${scriptpath%/*}
 hue=(-level "0%,100%,0.6")
 effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
 # default system sans-serif font
-font="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
-image="$(mktemp).png"
+font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
+image=$(mktemp).png
 shot=(import -window root)
 desktop=""
-param_add=("")
+i3lock_cmd=(i3lock -i "$image")
 shot_custom=false
 
 options="Options:
@@ -79,7 +79,7 @@ while true ; do
         -l|--listfonts)
 	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
 	    exit 0 ;;
-	-n|--nofork) param_add=(--nofork) ; shift ;;
+	-n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
         --) shift; shot_custom=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
@@ -119,10 +119,10 @@ convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$
 # the desktop) before locking.
 ${desktop} ${desktop:+-k on}
 
-# try to use a forked version of i3lock with prepared parameters
-if ! i3lock "${param_add[@]}" "${param[@]}" -i "$image" > /dev/null 2>&1; then
+# try to use i3lock with prepared parameters
+if ! "${i3lock_cmd[@]}" "${param[@]}" >/dev/null 2>&1; then
     # We have failed, lets get back to stock one
-    i3lock "${param_add[@]}" -i "$image"
+    "${i3lock_cmd[@]}"
 fi
 
 # As above, if we were passed -d/--desktop, we'll attempt to restore all windows
