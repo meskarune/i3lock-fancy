@@ -3,20 +3,47 @@
 # Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional)
 set -o errexit -o noclobber -o nounset
 
-# Determines if the screenshot taken is dark in a given area
-# This is used to choose which lock to use and in which color to show the text
-# $1 - See $1 of get_brightness
-# $2 - (between 0 and 100) Threshold value. If a value lower than this is found, the image is dark in the given area
-is_dark() {
-    [ "$(get_brightness "$1")" -gt "$2" ] && return 1 || return 0
-}
-
 # Determines the brightness of the screenshot
-# $1 - Arguments passed to 'convert'. For example this can be used to crop the image, to just sample a part of it
-
+# $1 - Image file to check
+# $2 - Arguments passed to 'convert'. For example this can be used to crop the image, to just sample a part of it
 get_brightness() {
     # Quite fast way of getting a brightness value
-    convert "$image" -gravity Center $1 -colorspace gray -format "%[fx:round(100*mean)]" info:
+    convert "$1" +repage $2 -colorspace gray -format "%[fx:round(100*mean)]" info:
+}
+
+# Applies the effects, the lock image and the text to the given monitor
+# Crops the screenshot to only the given monitor and performs all operation on that image
+# The images for all the monitors are later stitched together
+# $1 - Monitor Width
+# $2 - Monitor Height
+# $3 - X Offset
+# $4 - Y Offset
+# Prints the brigthness in the center of the monitor to stdout
+# This is used to determine the average brightness in the centers of all the monitors and to then set the proper colors
+# for i3lock-color
+process_monitor() {
+    # Store the offset information directly in the filename
+    file="$wd/MON+$3+$4.png"
+
+    # Extract only the screenshot for the current monitor
+    convert "$image" -crop "$1x$2+$3+$4" "$file"
+
+    # Get brightness for the middle of the monitor
+    brightness="$(get_brightness "$file" "-gravity Center -crop 100x100+0+0")"
+
+    if [ "$brightness" -gt "$threshold" ]; then # bright background image and black text
+        text_color="black"
+        icon="$scriptpath/icons/lockdark.png"
+    else # dark background image and white text
+        text_color="white"
+        icon="$scriptpath/icons/lock.png"
+    fi
+
+    # Apply everything to the image containing only the screenshot of the given monitor
+    convert "$file" "${hue[@]}" "${effect[@]}" +repage -font "$font" -pointsize 26 -fill "$text_color" -gravity Center \
+        -annotate +0+160 "$text" "$icon" -gravity Center -composite "$file"
+
+    echo "$brightness"
 }
 
 # get path where the script is located to find the lock icon
@@ -27,8 +54,10 @@ hue=(-level "0%,100%,0.6")
 effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
 # default system sans-serif font
 font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
+wd="$(mktemp -d)"
 image=$(mktemp).png
 shot=(import -window root)
+threshold="60" #brightness value to compare to, everything above is considered white and everything below black
 desktop=""
 i3lock_cmd=(i3lock -i "$image")
 shot_custom=false
@@ -60,6 +89,7 @@ options="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$image"' EXIT
+trap 'rm -rf "$wd"' EXIT
 temp="$(getopt -o :hdnpglt:f: -l desktop,help,listfonts,nofork,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
 eval set -- "$temp"
 
@@ -105,28 +135,60 @@ if "$shot_custom" && [[ $# -gt 0 ]]; then
     shot=("$@");
 fi
 
+cd "$wd" || exit 1
+
 command -- "${shot[@]}" "$image"
 
-value="60" #brightness value to compare to
+# We collect the brightness values from all the monitors and average them, from that we determine which flags to pass to
+# i3lock-color since the colors for i3lock-color cannot be specified per monitor. 
+# We could also just call get_brightness on the whole image but process_monitor samples only the center 
+# of the screen where the lock actually is, so we get a better value for the brightness
+sum_brightness=0
+num_monitors=0
 
-if ! is_dark "-gravity Center -crop 100x100+0+0" "$value"; then #white background image and black text
-    bw="black"
-    icon="$scriptpath/icons/lockdark.png"
+# Loop through all connected monitors (as reported by xrandr)
+# For each monitor its section in the screenshot is extracted and processed
+while read -r monitor; do
+    if [[ "$monitor" =~ ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) ]]; then
+        width=${BASH_REMATCH[1]}
+        height=${BASH_REMATCH[2]}
+        x_offset=${BASH_REMATCH[3]}
+        y_offset=${BASH_REMATCH[4]}
+
+        # TODO fork
+        brightness=$(process_monitor "$width" "$height" "$x_offset" "$y_offset")
+
+        sum_brightness=$((brightness + sum_brightness))
+        num_monitors=$((num_monitors + 1))
+    fi
+done <<<"$(xrandr --verbose | grep "\bconnected\b")"
+
+avg_brightness=$((sum_brightness / num_monitors))
+
+if [ "$avg_brightness" -gt "$threshold" ]; then # Screenshot is rather bright, so we use dark colors
     param=("--textcolor=00000000" "--insidecolor=0000001c" "--ringcolor=0000003e" \
         "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
         "--separatorcolor=22222260" "--insidevercolor=ffffff1c" \
         "--ringwrongcolor=ffffff55" "--insidewrongcolor=ffffff1c")
-else #black
-    bw="white"
-    icon="$scriptpath/icons/lock.png"
+else # Bright colors
     param=("--textcolor=ffffff00" "--insidecolor=ffffff1c" "--ringcolor=ffffff3e" \
         "--linecolor=ffffff00" "--keyhlcolor=00000080" "--ringvercolor=00000000" \
         "--separatorcolor=22222260" "--insidevercolor=0000001c" \
         "--ringwrongcolor=00000055" "--insidewrongcolor=0000001c")
 fi
 
-convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
-    -annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
+stitch_params=()
+
+for f in MON*.png; do
+    # The offset information for the monitors is stored directly in the filename so we don't have 
+    # to map the offsets to the filenames
+    offset=${f%.*}
+    offset=${offset:3}
+    stitch_params+=("-page" "$offset" "$f")
+done
+
+# Merge the screenshots of the individual monitors back together into one big image
+convert "${stitch_params[@]}" -background transparent -layers merge "$image"
 
 # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
 # the desktop) before locking.
