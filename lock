@@ -3,6 +3,22 @@
 # Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional)
 set -o errexit -o noclobber -o nounset
 
+# Determines if the screenshot taken is dark in a given area
+# This is used to choose which lock to use and in which color to show the text
+# $1 - See $1 of get_brightness
+# $2 - (between 0 and 100) Threshold value. If a value lower than this is found, the image is dark in the given area
+is_dark() {
+    [ "$(get_brightness "$1")" -gt "$2" ] && return 1 || return 0
+}
+
+# Determines the brightness of the screenshot
+# $1 - Arguments passed to 'convert'. For example this can be used to crop the image, to just sample a part of it
+
+get_brightness() {
+    # Quite fast way of getting a brightness value
+    convert "$image" -gravity Center $1 -colorspace gray -format "%[fx:round(100*mean)]" info:
+}
+
 # get path where the script is located to find the lock icon
 scriptpath=$(readlink -f -- "$0")
 scriptpath=${scriptpath%/*}
@@ -93,10 +109,7 @@ command -- "${shot[@]}" "$image"
 
 value="60" #brightness value to compare to
 
-color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
-    -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
-
-if [[ $color -gt $value ]]; then #white background image and black text
+if ! is_dark "-gravity Center -crop 100x100+0+0" "$value"; then #white background image and black text
     bw="black"
     icon="$scriptpath/icons/lockdark.png"
     param=("--textcolor=00000000" "--insidecolor=0000001c" "--ringcolor=0000003e" \
