@@ -15,6 +15,11 @@ get_brightness() {
 # $1 - The text to checked
 # Prints the text width in pixels to stdout
 get_text_width() {
+    # empty text or text containing only whitespace would throw an error so we just return zero
+    if [ -z "${1// }" ]; then
+        echo 0
+        return
+    fi
     convert "${text_options[@]}" label:"$1" -format "%[fx:w]\n" info:
 }
 
@@ -58,7 +63,15 @@ process_monitor() {
         icon="$scriptpath/icons/lock.png"
     fi
 
-    decoration_params+=(+repage "${text_options[@]}" -fill "$text_color" -annotate "+$x_text+$y_text" "$text" "$icon" -geometry "+$x_icon+$y_icon" -composite)
+    decoration_params+=(+repage)
+
+    if [ "$text_width" -ne 0 ]; then
+        # Only add text flags, if there actually is text
+        decoration_params+=("${text_options[@]}" -fill "$text_color" -annotate "+$x_text+$y_text" "$text")
+    fi
+
+    decoration_params+=("$icon" -geometry "+$x_icon+$y_icon" -composite)
+
 
     # Write brightness to file descriptor
     exec 3<<< "$brightness"
