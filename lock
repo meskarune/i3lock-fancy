@@ -40,7 +40,7 @@ process_monitor() {
     fi
 
     # Apply everything to the image containing only the screenshot of the given monitor
-    convert "$file" "${hue[@]}" "${effect[@]}" +repage -font "$font" -pointsize 26 -fill "$text_color" -gravity Center \
+    convert "$file" +repage -font "$font" -pointsize 26 -fill "$text_color" -gravity Center \
         -annotate +0+160 "$text" "$icon" -gravity Center -composite "$file"
 
     echo "$brightness"
@@ -142,6 +142,8 @@ fi
 cd "$wd" || exit 1
 
 command -- "${shot[@]}" "$image"
+
+convert "$image" "${hue[@]}" "${effect[@]}" "$image"
 
 # We collect the brightness values from all the monitors and average them, from that we determine which flags to pass to
 # i3lock-color since the colors for i3lock-color cannot be specified per monitor. 
