@@ -18,25 +18,37 @@ get_text_width() {
     convert "${text_options[@]}" label:"$1" -format "%[fx:w]\n" info:
 }
 
-# Applies the effects, the lock image and the text to the given monitor
-# Crops the screenshot to only the given monitor and performs all operation on that image
-# The images for all the monitors are later stitched together
+# Calculates the absolute positions for the lock and text or the given monitor, generates the command line arguemnts
+# for convert that apply the lock icon and the text to the proper locations and adds them to the decorations_params array
 # $1 - Monitor Width
 # $2 - Monitor Height
 # $3 - X Offset
 # $4 - Y Offset
-# Prints the brigthness in the center of the monitor to stdout
+# Prints the brigthness in the center of the monitor to file descriptor 3
 # This is used to determine the average brightness in the centers of all the monitors and to then set the proper colors
 # for i3lock-color
 process_monitor() {
-    # Store the offset information directly in the filename
-    file="$wd/MON+$3+$4.png"
+    width=$1
+    height=$2
+    x_offset=$3
+    y_offset=$4
 
-    # Extract only the screenshot for the current monitor
-    convert "$image" -crop "$1x$2+$3+$4" "$file"
+    # center coordinates relative to the current monitor
+    x_mid=$((width / 2))
+    y_mid=$((height / 2))
+
+    # absolute X, Y coordinates of the top left edge of the text
+    x_text=$((x_offset + x_mid - (text_width / 2)))
+    y_text=$((y_offset + y_mid + 160))
+
+    # absolute X, Y coordinates of the top left edge of the icon
+    # The lock icon has dimensions 60x60, we subtract half of that from each dimension
+    # If the lock dimensions ever change, these values here need to be changed too
+    x_icon=$((x_offset + x_mid - 30))
+    y_icon=$((y_offset + y_mid - 30))
 
     # Get brightness for the middle of the monitor
-    brightness="$(get_brightness "$file" "-gravity Center -crop 100x100+0+0")"
+    brightness="$(get_brightness "$image" "-crop 100x100+$x_icon+$y_icon")"
 
     if [ "$brightness" -gt "$threshold" ]; then # bright background image and black text
         text_color="black"
@@ -46,11 +58,10 @@ process_monitor() {
         icon="$scriptpath/icons/lock.png"
     fi
 
-    # Apply everything to the image containing only the screenshot of the given monitor
-    convert "$file" +repage "${text_options[@]}" -fill "$text_color" -gravity Center -annotate +0+160 "$text" \
-        "$icon" -gravity Center -composite "$file"
+    decoration_params+=(+repage "${text_options[@]}" -fill "$text_color" -annotate "+$x_text+$y_text" "$text" "$icon" -geometry "+$x_icon+$y_icon" -composite)
 
-    echo "$brightness"
+    # Write brightness to file descriptor
+    exec 3<<< "$brightness"
 }
 
 # get path where the script is located to find the lock icon
@@ -153,7 +164,9 @@ cd "$wd" || exit 1
 
 command -- "${shot[@]}" "$image"
 
-convert "$image" "${hue[@]}" "${effect[@]}" "$image"
+# All the arguments to be passed to convert, to add the lock and text to the monitors is collected here so that we can
+# apply them in a single call to convert
+decoration_params=()
 
 # We collect the brightness values from all the monitors and average them, from that we determine which flags to pass to
 # i3lock-color since the colors for i3lock-color cannot be specified per monitor. 
@@ -163,7 +176,7 @@ sum_brightness=0
 num_monitors=0
 
 # Loop through all connected monitors (as reported by xrandr)
-# For each monitor its section in the screenshot is extracted and processed
+# For each monitor the convert arguments to add the lock and text to that monitor are generated
 while read -r monitor; do
     if [[ "$monitor" =~ ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) ]]; then
         width=${BASH_REMATCH[1]}
@@ -171,13 +184,19 @@ while read -r monitor; do
         x_offset=${BASH_REMATCH[3]}
         y_offset=${BASH_REMATCH[4]}
 
-        # TODO fork
-        brightness=$(process_monitor "$width" "$height" "$x_offset" "$y_offset")
+        # We get the return value from the function by using a new file descriptor
+        # The traditional approach of using $(process_monitor ...) and echo doesn't work because it forks into a 
+        # subshell and then process_monitor cannot access decoration_params
+        exec 3>&-
+        process_monitor "$width" "$height" "$x_offset" "$y_offset" && read -r brightness <&3
+        exec 3>&-
 
         sum_brightness=$((brightness + sum_brightness))
         num_monitors=$((num_monitors + 1))
     fi
 done <<<"$(xrandr --verbose | grep "\bconnected\b")"
+
+convert "$image" "${hue[@]}" "${effect[@]}" "${decoration_params[@]}" "$image"
 
 avg_brightness=$((sum_brightness / num_monitors))
 
@@ -192,19 +211,6 @@ else # Bright colors
         "--separatorcolor=22222260" "--insidevercolor=0000001c" \
         "--ringwrongcolor=00000055" "--insidewrongcolor=0000001c")
 fi
-
-stitch_params=()
-
-for f in MON*.png; do
-    # The offset information for the monitors is stored directly in the filename so we don't have 
-    # to map the offsets to the filenames
-    offset=${f%.*}
-    offset=${offset:3}
-    stitch_params+=("-page" "$offset" "$f")
-done
-
-# Merge the screenshots of the individual monitors back together into one big image
-convert "${stitch_params[@]}" -background transparent -layers merge "$image"
 
 # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
 # the desktop) before locking.
