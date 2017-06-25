@@ -11,6 +11,13 @@ get_brightness() {
     convert "$1" +repage $2 -colorspace gray -format "%[fx:round(100*mean)]" info:
 }
 
+# Determines the width of the given text when processed using the text_options flag
+# $1 - The text to checked
+# Prints the text width in pixels to stdout
+get_text_width() {
+    convert "${text_options[@]}" label:"$1" -format "%[fx:w]\n" info:
+}
+
 # Applies the effects, the lock image and the text to the given monitor
 # Crops the screenshot to only the given monitor and performs all operation on that image
 # The images for all the monitors are later stitched together
@@ -40,8 +47,8 @@ process_monitor() {
     fi
 
     # Apply everything to the image containing only the screenshot of the given monitor
-    convert "$file" +repage -font "$font" -pointsize 26 -fill "$text_color" -gravity Center \
-        -annotate +0+160 "$text" "$icon" -gravity Center -composite "$file"
+    convert "$file" +repage "${text_options[@]}" -fill "$text_color" -gravity Center -annotate +0+160 "$text" \
+        "$icon" -gravity Center -composite "$file"
 
     echo "$brightness"
 }
@@ -138,6 +145,9 @@ done
 if "$shot_custom" && [[ $# -gt 0 ]]; then
     shot=("$@");
 fi
+
+text_options=(-font "$font" -pointsize 26)
+text_width=$(get_text_width "$text")
 
 cd "$wd" || exit 1
 
