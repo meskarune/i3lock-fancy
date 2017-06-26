@@ -87,8 +87,4 @@ Systemd Unit file example (edit for your own use):
 
 Multiple Monitors
 -----------------
-There is a branch called dual monitor with support for multiple monitors. This
-branch uses a grey icon and text with outlines to make it visible on light and
-dark backgrounds (though it looks better on dark backgrounds). I am still
-working to get it looking just right right. The script is usable now, but it's
-under developement and things may change.
+This script fully supports multiple monitors. The lock and text are drawn on the center of each monitor.
