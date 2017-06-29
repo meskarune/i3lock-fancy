@@ -14,7 +14,7 @@ Dependencies
 * imagemagick
 * bash
 * awk
-* utils-linux
+* util-linux
 
 Optional Dependencies
 ---------------------
