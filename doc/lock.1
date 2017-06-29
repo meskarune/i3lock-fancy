@@ -7,7 +7,8 @@
 .SH DESCRIPTION
 
 Takes a screenshot of the desktop, blurs the background and adds a lock icon and
-text.
+text. This blurred image is then given to \fBi3lock\fR as the lockscreen
+background.
 
 .SH SYNOPSIS
 
@@ -17,7 +18,7 @@ text.
 
 .TP
 \fB-h, --help\fP
-This help menu.
+Display a help screen and exit.
 
 .TP
 \fB-d, --desktop\fP
@@ -57,7 +58,10 @@ Must be last option. Set command to use for taking a screenshot. Default is
 \'import -window root\'. Using \'scrot\' or \'maim\' will increase script speed and
 allow setting custom flags like having a delay.
 
+.SH SEE ALSO
+\fBi3lock\fR(1)
+
 .SH AUTHORS
 
-Dolores Portalatin <admin@doloresportalatin.info>
+Dolores Portalatin <hello@doloresportalatin.info>
 
