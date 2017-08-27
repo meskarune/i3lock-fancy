@@ -36,7 +36,10 @@ Usage
         -h, --help       This help menu.
     
         -d, --desktop    Attempt to minimize all windows before locking. Requires wmctrl.
-    
+
+        -b <blurlevel>, --blur <blurlevel>  Set a custom blur level.
+                         Default: 1.5
+
         -g, --greyscale  Set background to greyscale instead of color.
     
         -p, --pixelate   Pixelate the background instead of blur, runs faster.
