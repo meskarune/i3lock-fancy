@@ -1,0 +1,5 @@
+#!/bin/sh
+
+
+cp lock /usr/local/bin
+cp -r icons /usr/local/bin
