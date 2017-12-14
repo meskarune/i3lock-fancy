@@ -24,8 +24,8 @@ Optional Dependencies
 Installation
 ------------
 * Arch Linux Package: https://aur.archlinux.org/packages/i3lock-fancy-git/
-* GNU GUix: Run `guix package --install i3lock-fancy`
-* GNU GuixSD: Define a screenlocker service in your system config to use. For example `(screen-locker-service i3lock-color "i3lock")` for i3lock-color, and add 'i3lock-fancy' to your global profile or your user profile.
+* GNU Guix: Run `guix package --install i3lock-fancy`
+* GNU GuixSD: Define a screenlocker service in your system config to use. For example `(screen-locker-service i3lock-color "i3lock")` for i3lock-color, and add 'i3lock-fancy' to your global profile (or user profile).
 * From source: git clone the repository and copy lock and /icons to "/usr/local/bin"
 
 Usage
