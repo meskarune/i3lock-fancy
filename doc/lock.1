@@ -29,8 +29,9 @@ Attempt to minimize all windows before locking.
 Set background to greyscale instead of color.
 
 .TP
-\fB-p, --pixelate\fP
-Pixelate the background instead of blur, runs faster.
+\fB-p, --pixelate[=factor]\fP
+Pixelate the background instead of blur, runs faster. The factor is the factor by
+which the backgroud will be scaled. Default is 0.1.
 
 .TP
 \fB-f <fontname>, --font <fontname>\fP
@@ -64,4 +65,3 @@ allow setting custom flags like having a delay.
 .SH AUTHORS
 
 Dolores Portalatin <hello@doloresportalatin.info>
-

@@ -24,7 +24,9 @@ options="Options:
 
     -g, --greyscale  Set background to greyscale instead of color.
 
-    -p, --pixelate   Pixelate the background instead of blur, runs faster.
+    -p, --pixelate[=factor]  Pixelate the background instead of blur, runs faster.
+                             The factor is the factor by which the backgroud will be
+                             scaled. Default is 0.1.
 
     -f <fontname>, --font <fontname>  Set a custom font.
 
@@ -44,7 +46,7 @@ options="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$image"' EXIT
-temp="$(getopt -o :hdnpglt:f: -l desktop,help,listfonts,nofork,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
+temp="$(getopt -o :hdnpglt:f: -l desktop,help,listfonts,nofork,pixelate::,greyscale,text:,font: --name "$0" -- "$@")"
 eval set -- "$temp"
 
 # l10n support
@@ -70,7 +72,15 @@ while true ; do
             printf "Usage: %s [options]\n\n%s\n\n" "${0##*/}" "$options"; exit 1 ;;
         -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
         -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -separate -average) ; shift ;;
-        -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
+        -p) effect=(-scale 10% -scale 1000%) ; shift ;;
+        --pixelate)
+            case "$2" in
+                "") effect=(-scale 10% -scale 1000%) ; shift 2 ;;
+                *)
+                  scale_down=$(echo "100*$2" | bc)
+                  scale_up=$(echo "100/$2" | bc)
+                  effect=(-scale $scale_down% -scale $scale_up%) ; shift 2 ;;
+            esac ;;
         -f|--font)
             case "$2" in
                 "") shift 2 ;;

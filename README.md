@@ -1,3 +1,4 @@
+
 i3lock-fancy
 ============
 
@@ -40,7 +41,9 @@ Usage
     
         -g, --greyscale  Set background to greyscale instead of color.
     
-        -p, --pixelate   Pixelate the background instead of blur, runs faster.
+        -p, --pixelate[=factor]  Pixelate the background instead of blur, runs faster.
+                                 The factor is the factor by which the backgroud will be
+                                 scaled. Default is 0.1.
     
         -f <fontname>, --font <fontname>  Set a custom font.
     
@@ -57,7 +60,7 @@ Usage
                          or 'maim' will increase script speed and allow setting
                          custom flags like haing a delay.
 
-example: ```lock -gpf Comic-Sans-MS -- scrot -z```
+example: ```lock -gf Comic-Sans-MS --pixelate=0.05 -- scrot -z```
 
 Extras
 ------
