@@ -47,7 +47,7 @@ options="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$image"' EXIT
-temp="$(getopt -o :hdnpglt:fb: -l desktop,help,listfonts,nofork,pixelate,greyscale,text:,font,blur: --name "$0" -- "$@")"
+temp="$(getopt -o :hdnpglt:f:b: -l desktop,help,listfonts,nofork,pixelate,greyscale,text:,font:,blur: --name "$0" -- "$@")"
 eval set -- "$temp"
 
 # l10n support
