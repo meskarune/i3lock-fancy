@@ -89,7 +89,7 @@ font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{
 image="$(mktemp --suffix=.png)"
 
 # brightness value to compare to, everything above is considered white and everything below black
-threshold="60" 
+threshold="40" 
 
 desktop=""
 shot=(import -window root)
