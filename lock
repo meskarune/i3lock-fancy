@@ -53,6 +53,7 @@ esac
 
 scrot -z "$IMAGE"
 ICON="$SCRIPTPATH/lock.png"
+bw=lightgrey
 PARAM=(--textcolor=ffffff00 --insidecolor=ffffff1c --ringcolor=ffffff3e \
        --linecolor=ffffff00 --keyhlcolor=00000080 --ringvercolor=00000000 \
        --separatorcolor=22222260 --insidevercolor=0000001c \
@@ -70,9 +71,9 @@ do
         MIDYi=$(($H / 2 + $Yoff - 60  / 2))
         MIDXt=$(($W / 2 + $Xoff - 285 / 2))
         MIDYt=$(($H / 2 + $Yoff + 320 / 2))
-        LOCK+=(-font $FONT -pointsize 26 -fill lightgrey -stroke grey10 \
-               -strokewidth 2 -annotate +$MIDXt+$MIDYt "$TEXT" \
-               -fill lightgrey -stroke lightgrey -strokewidth 1 -annotate +$MIDXt+$MIDYt "$TEXT" \
+        LOCK+=(-font $FONT -pointsize 26 -fill $bw \
+               -annotate +$MIDXt+$MIDYt "$TEXT" \
+               -fill $bw  -annotate +$MIDXt+$MIDYt "$TEXT" \
                $ICON -geometry +$MIDXi+$MIDYi -composite)
     fi
 done <<<"$(xrandr)"
