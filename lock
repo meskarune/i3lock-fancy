@@ -71,6 +71,7 @@ while true ; do
         -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
         -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -average) ; shift ;;
         -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
+		-n|--no-effect) effect=() ; hue=() ; shift ;;
         -f|--font)
             case "$2" in
                 "") shift 2 ;;
@@ -118,7 +119,7 @@ else #black
 fi
 
 convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
-    -annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
+	-annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
 
 # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
 # the desktop) before locking.
