@@ -31,7 +31,7 @@ Installation
 Usage
 -----
 
-    lock [options]
+    i3lock-fancy [options]
     
     Options:
         -h, --help       This help menu.
@@ -57,7 +57,7 @@ Usage
                          or 'maim' will increase script speed and allow setting
                          custom flags like haing a delay.
 
-example: ```lock -gpf Comic-Sans-MS -- scrot -z```
+example: ```i3lock-fancy -gpf Comic-Sans-MS -- scrot -z```
 
 Extras
 ------
