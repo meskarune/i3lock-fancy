@@ -5,5 +5,7 @@ BINDIR ?= $(PREFIX)/bin
 
 install:
 	@install -Dm755 i3lock-fancy  -t $(DESTDIR)$(BINDIR)
-	@install -Dm755 icons/*      -t $(DESTDIR)$(SHRDIR)/$(PROGNM)/icons
-	@install -Dm644 LICENSE      -t $(DESTDIR)$(SHRDIR)/licenses/$(PRGM)
+	@mkdir   -m755                   $(DESTDIR)$(SHRDIR)/$(PRGM)/icons
+	@install -Dm644 icons/*       -t $(DESTDIR)$(SHRDIR)/$(PRGM)/icons
+	@install -Dm644 doc/i3lock-fancy.1  -t $(DESTDIR)$(SHRDIR)/man/man1
+        @install -Dm644 LICENSE       -t $(DESTDIR)$(SHRDIR)/licenses/$(PRGM)

@@ -1,13 +1,13 @@
-.TH LOCK 1 2017-06-26
+.TH i3lock-fancy 1 2018-08-07
 
 .SH NAME
 .B lock
-- Bash script around i3lock for fancy effect
+- Bash script around i3lock for fancy effects
 
 .SH DESCRIPTION
 
-Takes a screenshot of the desktop, blurs the background and adds a lock icon and
-text. This blurred image is then given to \fBi3lock\fR as the lockscreen
+Takes a screenshot of the desktop or uses a provided PNG file, blurs or pixelates it, and adds a lock icon and
+text. The resulting image is passed to \fBi3lock\fR as the lockscreen.
 background.
 
 .SH SYNOPSIS
@@ -58,7 +58,7 @@ Do not fork i3lock after starting.
 
 .TP
 \fB--\fP
-Must be last option. Set command to use for taking a screenshot. Default is
+Specify a custom command to use for taking a screenshot. This must be the final command-line option. The default is
 \'import -window root\'. Using \'scrot\' or \'maim\' will increase script speed and
 allow setting custom flags like having a delay.
 
