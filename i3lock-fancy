@@ -69,7 +69,7 @@ while true ; do
         -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
         -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -average) ; shift ;;
         -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
-	-i|--image) cp "$2" $image ; shot=""  ; shift 2 ;;
+        -i|--image) cp "$2" "$image" ; shot=""  ; shift 2 ;;
         -f|--font)
             case "$2" in
                 "") shift 2 ;;
