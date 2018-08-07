@@ -23,10 +23,25 @@ Optional Dependencies
 
 Installation
 ------------
-* Arch Linux Package: https://aur.archlinux.org/packages/i3lock-fancy-git/
+
+To install i3lock-fancy manually, git clone the repository:
+
+    git clone https://github.com/meskarune/i3lock-fancy.git
+
+Then change to the directory and run make.
+
+    cd i3lock-fancy
+    sudo make install
+
+**IMPORTANT NOTE: the way to install i3lock-fancy has changed! If you are a
+  package maintainer or previously installed manually you may have to review
+  and update your configurations. The new change simplifies a lot of
+  things so updates will be easier in the future.**
+
+The following distro's have packages you can use to install:
+* Arch Linux: https://aur.archlinux.org/packages/i3lock-fancy-git/
 * GNU Guix: Run `guix package --install i3lock-fancy`
-* GNU GuixSD: Define a screenlocker service in your system config to use. For example `(screen-locker-service i3lock-color "i3lock")` for i3lock-color, and add 'i3lock-fancy' to your global profile (or user profile).
-* From source: git clone the repository and copy lock and /icons to "/usr/local/bin"
+* Debian: https://packages.debian.org/sid/i3lock-fancy
 
 Usage
 -----
@@ -81,15 +96,16 @@ Systemd Unit file example (edit for your own use):
     Type=simple
     User=meskarune
     Environment=DISPLAY=:0
-    ExecStart=/usr/bin/xautolock -time 5 -locker /usr/local/bin/lock/lock -detectsleep
+    ExecStart=/usr/bin/xautolock -time 5 -locker /usr/bin/i3lock-fancy -detectsleep
     
     [Install]
     WantedBy=graphical.target
 
 Multiple Monitors
 -----------------
-There is a branch called dual monitor with support for multiple monitors. This
-branch uses a grey icon and text with outlines to make it visible on light and
-dark backgrounds (though it looks better on dark backgrounds). I am still
-working to get it looking just right right. The script is usable now, but it's
-under developement and things may change.
+There is a branch called dual monitor with support for multiple monitors. 
+(it is currently out of date compared to the main locker, I need to update 
+it with all the new features) This branch uses a grey icon and text with 
+outlines to make it visible on light and dark backgrounds (though it looks 
+better on dark backgrounds). I am still working to get it looking just right 
+right. The script is usable now, but it's under developement and things may change.
