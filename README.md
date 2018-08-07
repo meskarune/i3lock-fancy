@@ -1,6 +1,22 @@
 i3lock-fancy
 ============
 
+This is a fork of the
+[i3lock-fancy](http://meskarune.github.io/i3lock-fancy/) git
+repository, providing the following additions and changes (pull
+requests pending):
+
+* New feature: allow suppression of displayed ring and keypress feedback
+* New feature: allow use of a static image instead of performing a
+  current screenshot
+* Rename and update man page
+* Improved MakeFile, correctly handles man page and icons
+
+
+
+Original readme begins here (but edited)
+============
+
 This is an i3lock bash script that takes a screenshot of the desktop, blurs the background and adds a lock icon and text
 
 website: [github pages website](http://meskarune.github.io/i3lock-fancy/)
@@ -47,18 +63,20 @@ Usage
 -----
 
     i3lock-fancy [options]
-    
+
     Options:
         -h, --help       This help menu.
-    
+
         -d, --desktop    Attempt to minimize all windows before locking. Requires wmctrl.
-    
+
         -g, --greyscale  Set background to greyscale instead of color.
-    
+
         -p, --pixelate   Pixelate the background instead of blur, runs faster.
-    
+
+        -i, --image <filename>  Use this PNG image. Do not modify it.
+
         -f <fontname>, --font <fontname>  Set a custom font.
-    
+
         -t <text>, --text <text> Set a custom text prompt.
 
         -l, --listfonts  Display a list of possible fonts for use with -f/--font.
@@ -66,11 +84,13 @@ Usage
                          the list and exits immediately.
 
         -n, --nofork     Do not fork i3lock after starting.
-    
-        --               Must be last option. Set command to use for taking a
-                         screenshot. Default is 'import -window root'. Using 'scrot'
-                         or 'maim' will increase script speed and allow setting
-                         custom flags like haing a delay.
+
+        -u, --nounlockindicator   Suppress display of the ring and keypress feedback.
+
+        --               Specify a custom command to use for taking a screenshot.
+                         This must be the final command-line option. The default is
+                         'import -window root'. Using 'scrot' or 'maim' will increase
+                         script speed and allow setting custom flags like having a delay."
 
 example: ```i3lock-fancy -gpf Comic-Sans-MS -- scrot -z```
 
@@ -84,28 +104,28 @@ The lock screen in action:
 To use this script you can set a hotkey in your window manager to run the lock command,
 set xautolock to run at boot, or use a systemd script to either lock on suspend or run xautolock.
 
-xautolock is a utility to automatically lock the screen after a set time. It also 
+xautolock is a utility to automatically lock the screen after a set time. It also
 supports hot corners.
 
 Systemd Unit file example (edit for your own use):
 
     [Unit]
     Description=Lock the screen automatically after a timeout
-    
+
     [Service]
     Type=simple
     User=meskarune
     Environment=DISPLAY=:0
     ExecStart=/usr/bin/xautolock -time 5 -locker /usr/bin/i3lock-fancy -detectsleep
-    
+
     [Install]
     WantedBy=graphical.target
 
 Multiple Monitors
 -----------------
-There is a branch called dual monitor with support for multiple monitors. 
-(it is currently out of date compared to the main locker, I need to update 
-it with all the new features) This branch uses a grey icon and text with 
-outlines to make it visible on light and dark backgrounds (though it looks 
-better on dark backgrounds). I am still working to get it looking just right 
+There is a branch called dual monitor with support for multiple monitors.
+(it is currently out of date compared to the main locker, I need to update
+it with all the new features) This branch uses a grey icon and text with
+outlines to make it visible on light and dark backgrounds (though it looks
+better on dark backgrounds). I am still working to get it looking just right
 right. The script is usable now, but it's under developement and things may change.

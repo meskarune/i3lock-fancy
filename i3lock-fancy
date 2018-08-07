@@ -34,15 +34,17 @@ options="Options:
 
     -n, --nofork     Do not fork i3lock after starting.
 
-    --               Must be last option. Set command to use for taking a
-                     screenshot. Default is 'import -window root'. Using 'scrot'
-                     or 'maim' will increase script speed and allow setting
-                     custom flags like having a delay."
+    -u, --nounlockindicator   Suppress display of the ring and keypress feedback.
+
+    --               Specify a custom command to use for taking a screenshot.
+                     This must be the final command-line option. The default is
+                     'import -window root'. Using 'scrot' or 'maim' will increase
+                     script speed and allow setting custom flags like having a delay."
 
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$image"' EXIT
-temp="$(getopt -o :hdnpgi:lt:f: -l desktop,help,listfonts,nofork,pixelate,greyscale,image:,text:,font: --name "$0" -- "$@")"
+temp="$(getopt -o :hdnpgi:lt:f:u -l desktop,help,listfonts,nofork,pixelate,greyscale,image:,text:,font:,nounlockindicator --name "$0" -- "$@")"
 eval set -- "$temp"
 
 # l10n support
@@ -80,6 +82,7 @@ while true ; do
 	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
 	    exit 0 ;;
 	-n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
+        -u|--nounlockindicator) i3lock_cmd=(i3lock -i "$image" -u) ; shift ;;
         --) shift; shot_custom=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
