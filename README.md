@@ -5,7 +5,7 @@ This is an i3lock bash script that takes a screenshot of the desktop, blurs the 
 
 website: [github pages website](http://meskarune.github.io/i3lock-fancy/)
 
-![screen shot of lockscreen](https://raw.githubusercontent.com/meskarune/i3lock-fancy/master/screenshot.png)
+![screen shot of lockscreen](https://raw.githubusercontent.com/meskarune/i3lock-fancy/dualmonitors/screenshot.png)
 
 Dependancies
 ------------
