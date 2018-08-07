@@ -8,6 +8,7 @@ EFFECT=(-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%)
 # default system sans-serif font
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
 IMAGE="$(mktemp).png"
+DM=$(xdpyinfo | awk '/^  dimensions(.+([0-9]+))/{print $2}')
 
 OPTIONS="Options:
     -h, --help   This help menu.
@@ -72,9 +73,11 @@ do
         MIDYi=$(($H / 2 + $Yoff - 60  / 2))
         MIDXt=$(($W / 2 + $Xoff - 285 / 2))
         MIDYt=$(($H / 2 + $Yoff + 320 / 2))
-        LOCK+=(-font $FONT -pointsize 26 -fill lightgrey -stroke grey10 \
-               -strokewidth 2 -annotate +$MIDXt+$MIDYt "$TEXT" \
-               -fill lightgrey -stroke lightgrey -strokewidth 1 -annotate +$MIDXt+$MIDYt "$TEXT" \
+        MIDXts=$(($MIDXt + 2))
+        MIDYts=$(($MIDYt + 2))
+        LOCK+=(\( -size $DM xc:none -font $FONT -pointsize 26 -fill black -annotate +$MIDXts+$MIDYts "$TEXT" -blur 0x2 \
+               -fill black -annotate +$MIDXts+$MIDYts "$TEXT" -blur 0x1 -fill white -annotate +$MIDXt+$MIDYt "$TEXT" \) \
+               -flatten \
                $ICON -geometry +$MIDXi+$MIDYi -composite)
     fi
 done <<<"$(xrandr)"
