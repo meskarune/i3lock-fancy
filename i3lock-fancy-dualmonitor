@@ -38,10 +38,6 @@ while true ; do
     esac
 done
 
-# get path where the script is located to find the lock icon
-SCRIPTPATH=$(realpath "$0")
-SCRIPTPATH=${SCRIPTPATH%/*}
-
 # l10n support
 TEXT="Type password to unlock"
 case "$LANG" in
@@ -53,7 +49,7 @@ case "$LANG" in
 esac
 
 scrot -z "$IMAGE"
-ICON="$SCRIPTPATH/lock.png"
+ICON="/usr/share/i3lock-fancy-dualmonitor/lock.png"
 PARAM=("--insidecolor=0000001c" "--ringcolor=0000003e" \
     "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
     "--separatorcolor=22222260" "--insidevercolor=ffffff1c" \
