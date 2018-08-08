@@ -79,7 +79,7 @@ while true ; do
 	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
 	    exit 0 ;;
 	-n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
-        -u|--nounlockindicator) i3lock_cmd=(i3lock -i "$image" -u) ; shift ;;
+        -u|--nounlockindicator) i3lock_cmd+=(-u) ; shift ;;
         --) shift; shot_custom=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
