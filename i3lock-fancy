@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
 # Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional)
-set -o errexit -o noclobber -o nounset
+set -o errexit -o noclobber
 
 hue="-level 0%,100%,0.6"
 effect="-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%"
@@ -75,7 +75,7 @@ while true ; do
         -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
         -g|--greyscale) hue="-level 0%,100%,0.6 -set colorspace Gray -average" ; shift ;;
         -p|--pixelate) effect="-scale 10% -scale 1000%" ; shift ;;
-        -i|--image) cp "$2" "$image" ; shot=""  ; shift 2 ;;
+        -i|--image) cp "$2" "$image" ; unset shot hue effect ; shift 2 ;;
         -f|--font)
             case "$2" in
                 "") shift 2 ;;
@@ -102,7 +102,7 @@ fi
 value="60" # brightness value to compare to
 
 color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
-    -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
+    -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}')
 
 if [ $color -gt $value ]; then # white background image and black text
     bw="black"
@@ -124,15 +124,9 @@ else # black
         --datecolor=00000000 --layoutcolor=00000000"
 fi
 
-if [ -n "$shot" ] ; then
-    convert "$image" $hue $effect \
+convert "$image" $hue $effect \
         -font "$font" -pointsize 26 -fill "$bw" -gravity center \
         -annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
-else
-    convert "$image" \
-        -font "$font" -pointsize 26 -fill "$bw" -gravity center \
-        -annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
-fi
 
 # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
 # the desktop) before locking.
