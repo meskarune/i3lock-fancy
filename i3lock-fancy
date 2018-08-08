@@ -51,11 +51,11 @@ temp="$(getopt -o :hdnpgi:lt:f:u -l desktop,help,listfonts,nofork,pixelate,greys
 eval set -- "$temp"
 
 # l10n support
-text="Type password to unlock"
+text="Enter password to unlock"
 case "${LANG:-}" in
     de_* ) text="Bitte Passwort eingeben" ;; # Deutsch
     da_* ) text="Indtast adgangskode" ;; # Danish
-    en_* ) text="Type password to unlock" ;; # English
+    en_* ) text="Enter password to unlock" ;; # English
     es_* ) text="Ingrese su contraseña" ;; # Española
     fr_* ) text="Entrez votre mot de passe" ;; # Français
     id_* ) text="Masukkan kata sandi Anda" ;; # Bahasa Indonesia
@@ -64,7 +64,7 @@ case "${LANG:-}" in
     pl_* ) text="Podaj hasło" ;; # Polish
     pt_* ) text="Digite a senha para desbloquear" ;; # Português
     ru_* ) text="Введите пароль" ;; # Russian
-    * ) text="Type password to unlock" ;; # Default to English
+    * ) text="Enter password to unlock" ;; # Default to English
 esac
 
 while true ; do
