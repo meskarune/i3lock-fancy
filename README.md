@@ -109,3 +109,16 @@ it with all the new features) This branch uses a grey icon and text with
 outlines to make it visible on light and dark backgrounds (though it looks 
 better on dark backgrounds). I am still working to get it looking just right 
 right. The script is usable now, but it's under developement and things may change.
+
+Static image
+------------
+If you would like to run `i3lock-color` with a static image `lock.png`, run 
+`convert` directly, and specify the result `newimage.png` to `i3lock -i`:
+```
+#!/bin/sh
+convert /path/to/background.png -font Liberation-Sans \
+    -pointsize 26 -fill white -gravity center \
+    -annotate +0+160 "Type Password to Unlock" lock.png \
+    -gravity center -composite newimage.png
+i3lock -i newimage.png
+```
