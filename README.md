@@ -11,7 +11,7 @@ requests pending):
   current screenshot
 * Rename and update man page
 * Improved MakeFile, correctly handles man page and icons
-
+* Minor speed tweaks
 
 
 Original readme begins here (but edited)
@@ -27,9 +27,11 @@ Dependencies
 ------------
 * <s>[i3lock-color-git](https://github.com/eBrnd/i3lock-color)</s>
 * [i3lock-color-git](https://github.com/PandorasFox/i3lock-color) - this is a fork of i3lock-color that is kept up to date with i3lock
-* imagemagick
+* fontconfig (for fc-match)
+* imagemagick (for convert)
 * bash
 * awk
+* sed
 * util-linux
 
 Optional Dependencies
