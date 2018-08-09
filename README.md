@@ -112,13 +112,18 @@ right. The script is usable now, but it's under developement and things may chan
 
 Static image
 ------------
-If you would like to run `i3lock-color` with a static image `lock.png`, run 
-`convert` directly, and specify the result `newimage.png` to `i3lock -i`:
+If you would like to run `i3lock-color` with a static image in the style of
+i3lock-fancy, run `convert` from image magick directly on the background image
+you want to use. Then specify the result `newimage.png` to `i3lock -i`:
 ```
 #!/bin/sh
+# Add a lock icon and text to the center of an image
 convert /path/to/background.png -font Liberation-Sans \
     -pointsize 26 -fill white -gravity center \
     -annotate +0+160 "Type Password to Unlock" lock.png \
     -gravity center -composite newimage.png
+```
+
+```
 i3lock -i newimage.png
 ```
