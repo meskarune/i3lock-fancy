@@ -38,7 +38,7 @@ Then change to the directory and run make.
   and update your configurations. The new change simplifies a lot of
   things so updates will be easier in the future.**
 
-The following distro's have packages you can use to install:
+### The following distro's have packages you can use to install:
 * Arch Linux: https://aur.archlinux.org/packages/i3lock-fancy-git/
 * GNU Guix: Run `guix package --install i3lock-fancy`
 * Debian: https://packages.debian.org/sid/i3lock-fancy
