@@ -56,6 +56,7 @@ case "${LANG:-}" in
     it_* ) text="Inserisci la password" ;; # Italian
     ja_* ) text="パスワードを入力してください" ;; # Japanese
     lv_* ) text="Ievadi paroli" ;; # Latvian
+    nb_* ) text="Skriv inn passord" ;; # Norwegian
     pl_* ) text="Podaj hasło" ;; # Polish
     pt_* ) text="Digite a senha para desbloquear" ;; # Português
     ru_* ) text="Введите пароль" ;; # Russian
