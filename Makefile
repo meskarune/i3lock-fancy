@@ -3,6 +3,8 @@ PREFIX ?= /usr
 SHRDIR ?= $(PREFIX)/share
 BINDIR ?= $(PREFIX)/bin
 
+all:
+
 install:
 	@install -Dm755 i3lock-fancy          -t $(DESTDIR)$(BINDIR)
 	@install -Dm644 icons/*               -t $(DESTDIR)$(SHRDIR)/$(PRGM)/icons
