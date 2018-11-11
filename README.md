@@ -41,7 +41,7 @@ Then change to the directory and run make.
 ### The following distro's have packages you can use to install:
 * Arch Linux: https://aur.archlinux.org/packages/i3lock-fancy-git/
 * GNU Guix: Run `guix package --install i3lock-fancy`
-* Debian: https://packages.debian.org/sid/i3lock-fancy
+* Debian / Ubuntu: https://packages.debian.org/sid/i3lock-fancy
 
 Usage
 -----
