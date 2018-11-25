@@ -3,6 +3,7 @@
 # Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional)
 set -o errexit -o noclobber -o nounset
 
+turnoff=""
 hue=(-level "0%,100%,0.6")
 effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
 # default system sans-serif font
@@ -15,6 +16,8 @@ shot_custom=false
 
 options="Options:
     -h, --help       This help menu.
+
+    -b	--blankscreen Turn off screen before locking.
 
     -d, --desktop    Attempt to minimize all windows before locking.
 
@@ -40,7 +43,7 @@ options="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$image"' EXIT
-temp="$(getopt -o :hdnpglt:f: -l desktop,help,listfonts,nofork,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
+temp="$(getopt -o :bhdnpglt:f: -l desktop,blankscreen,help,listfonts,nofork,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
 eval set -- "$temp"
 
 # l10n support
@@ -68,6 +71,7 @@ while true ; do
         -h|--help)
             printf "Usage: %s [options]\n\n%s\n\n" "${0##*/}" "$options"; exit 1 ;;
         -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
+	-b|--blankscreen) turnoff=$(xset dpms force off) ; shift ;;
         -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -average) ; shift ;;
         -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
         -f|--font)
@@ -126,7 +130,7 @@ ${desktop} ${desktop:+-k on}
 # try to use i3lock with prepared parameters
 if ! "${i3lock_cmd[@]}" "${param[@]}" >/dev/null 2>&1; then
     # We have failed, lets get back to stock one
-    xset dpms force off
+    "${i3lock_cmd[@]}"
     "${i3lock_cmd[@]}"
 fi
 
