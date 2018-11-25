@@ -131,7 +131,6 @@ ${desktop} ${desktop:+-k on}
 if ! "${i3lock_cmd[@]}" "${param[@]}" >/dev/null 2>&1; then
     # We have failed, lets get back to stock one
     "${i3lock_cmd[@]}"
-    "${i3lock_cmd[@]}"
 fi
 
 # As above, if we were passed -d/--desktop, we'll attempt to restore all windows
