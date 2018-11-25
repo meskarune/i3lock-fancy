@@ -1,5 +1,7 @@
 i3lock-fancy
 ============
+**FORK:** Added blank screen before lock.
+
 
 This is an i3lock bash script that takes a screenshot of the desktop, blurs the background and adds a lock icon and text
 

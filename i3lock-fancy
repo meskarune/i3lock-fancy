@@ -126,6 +126,7 @@ ${desktop} ${desktop:+-k on}
 # try to use i3lock with prepared parameters
 if ! "${i3lock_cmd[@]}" "${param[@]}" >/dev/null 2>&1; then
     # We have failed, lets get back to stock one
+    xset dpms force off
     "${i3lock_cmd[@]}"
 fi
 
