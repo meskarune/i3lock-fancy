@@ -10,6 +10,9 @@ font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{
 image=$(mktemp --suffix=.png)
 shot=(import -window root)
 desktop=""
+prefix="/usr"
+shrdir="${prefix}/share"
+bindir="${prefix}/bin"
 i3lock_cmd=(i3lock -i "$image")
 shot_custom=false
 
@@ -99,7 +102,7 @@ color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace h
 
 if [[ $color -gt $value ]]; then #white background image and black text
     bw="black"
-    icon="/usr/share/i3lock-fancy/icons/lockdark.png"
+    icon="${shrdir}/i3lock-fancy/icons/lockdark.png"
     param=("--insidecolor=0000001c" "--ringcolor=0000003e" \
         "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
         "--separatorcolor=22222260" "--insidevercolor=ffffff1c" \
@@ -108,7 +111,7 @@ if [[ $color -gt $value ]]; then #white background image and black text
         "--datecolor=ffffff00" "--layoutcolor=ffffff00")
 else #black
     bw="white"
-    icon="/usr/share/i3lock-fancy/icons/lock.png"
+    icon="${shrdir}/i3lock-fancy/icons/lock.png"
     param=("--insidecolor=ffffff1c" "--ringcolor=ffffff3e" \
         "--linecolor=ffffff00" "--keyhlcolor=00000080" "--ringvercolor=00000000" \
         "--separatorcolor=22222260" "--insidevercolor=0000001c" \
