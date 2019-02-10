@@ -4,7 +4,8 @@ SHRDIR ?= $(PREFIX)/share
 BINDIR ?= $(PREFIX)/bin
 
 install:
-	sed -i s#^prefix=.*#prefix=\"$(PREFIX)\"# $(PRGM)
+	@PREFIX=$(readlink -f $(PREFIX))
+	@sed -i s#^prefix=.*#prefix=\"$(PREFIX)\"# $(PRGM)
 	@install -Dm755 i3lock-fancy          -t $(DESTDIR)$(BINDIR)
 	@install -Dm644 icons/*               -t $(DESTDIR)$(SHRDIR)/$(PRGM)/icons
 	@install -Dm644 doc/i3lock-fancy.1    -t $(DESTDIR)$(SHRDIR)/man/man1
