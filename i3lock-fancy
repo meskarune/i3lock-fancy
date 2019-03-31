@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
-# Dependencies: ffmpeg, i3lock-color-git, wmctrl (optional)
+# Dependencies: ffmpeg, i3lock-color-git, xorg-xrandr, wmctrl (optional)
 set -o errexit -o noclobber -o nounset -o pipefail
 
 lock_file="/usr/share/i3lock-fancy/lock.png"
