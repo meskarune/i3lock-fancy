@@ -1,17 +1,16 @@
 #!/usr/bin/env bash
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
-# Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional)
-set -o errexit -o noclobber -o nounset
+# Dependencies: ffmpeg, i3lock-color-git, wmctrl (optional)
+set -o errexit -o noclobber -o nounset -o pipefail
 
-hue=(-level "0%,100%,0.6")
-effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
-# default system sans-serif font
-font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
-image=$(mktemp --suffix=.png)
-shot=(import -window root)
+lock_file="/usr/share/i3lock-fancy/lock.png"
+image_file=$(mktemp -u --suffix=.png)
+trap "rm -f $image_file" EXIT
+font_file=$(fc-match sans-serif --format=%{file})
+greyscale=""
+effect="boxblur=5:5"
 desktop=""
-i3lock_cmd=(i3lock -i "$image")
-shot_custom=false
+i3lock_cmd=(i3lock -i "$image_file")
 
 options="Options:
     -h, --help       This help menu.
@@ -30,16 +29,8 @@ options="Options:
                      Note: this option will not lock the screen, it displays
                      the list and exits immediately.
 
-    -n, --nofork     Do not fork i3lock after starting.
+    -n, --nofork     Do not fork i3lock after starting."
 
-    --               Must be last option. Set command to use for taking a
-                     screenshot. Default is 'import -window root'. Using 'scrot'
-                     or 'maim' will increase script speed and allow setting
-                     custom flags like having a delay."
-
-# move pipefail down as for some reason "convert -list font" returns 1
-set -o pipefail
-trap 'rm -f "$image"' EXIT
 temp="$(getopt -o :hdnpglt:f: -l desktop,help,listfonts,nofork,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
 eval set -- "$temp"
 
@@ -52,7 +43,7 @@ case "${LANG:-}" in
     en_* ) text="Type password to unlock" ;; # English
     es_* ) text="Ingrese su contraseña" ;; # Española
     fr_* ) text="Entrez votre mot de passe" ;; # Français
-    he_* ) text="הליענה לטבל המסיס דלקה" ;; # Hebrew עברית (convert doesn't play bidi well)
+    he_* ) text="הליענה לטבל המסיס דלקה" ;; # Hebrew עברית
     id_* ) text="Masukkan kata sandi Anda" ;; # Bahasa Indonesia
     it_* ) text="Inserisci la password" ;; # Italian
     ja_* ) text="パスワードを入力してください" ;; # Japanese
@@ -64,71 +55,103 @@ case "${LANG:-}" in
     * ) text="Type password to unlock" ;; # Default to English
 esac
 
-while true ; do
+# arrays to hold midpoints, each index corresponds to a monitor
+# when populated each array has length equal to the number of monitors
+# x midpoints for the lock image and text
+mid_x=()
+# y midpoints for the lock image
+mid_y_i=()
+# y midpoints for the text
+mid_y_t=()
+
+while read line; do
+    if [[ "$line" =~ current" "([0-9]+)" "x" "([0-9]+) ]]; then
+        screen_res_x=${BASH_REMATCH[1]}
+        screen_res_y=${BASH_REMATCH[2]}
+    fi
+    if [[ "$line" =~ ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) ]]; then
+        monitor_width=${BASH_REMATCH[1]}
+        monitor_height=${BASH_REMATCH[2]}
+        monitor_x_offset=${BASH_REMATCH[3]}
+        monitor_y_offset=${BASH_REMATCH[4]}
+        mid_x+=($(($monitor_x_offset + $monitor_width / 2)))
+        mid_y_i+=($(($monitor_y_offset + $monitor_height / 2)))
+        mid_y_t+=($(($monitor_y_offset + $monitor_height / 2 + 180)))
+    fi
+done <<< "$(xrandr)"
+
+number_of_monitors=${#mid_x[@]}
+
+while [ $# -gt 0 ] ; do
     case "$1" in
         -h|--help)
             printf "Usage: %s [options]\n\n%s\n\n" "${0##*/}" "$options"; exit 1 ;;
         -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
-        -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -average) ; shift ;;
-        -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
+        -g|--greyscale) greyscale="format=gray," ; shift ;;
+        -p|--pixelate)
+          pixel_size=15
+          effect="scale='iw/$pixel_size:-1', scale='$screen_res_x:$screen_res_y:flags=neighbor'" ; shift ;;
         -f|--font)
             case "$2" in
                 "") shift 2 ;;
-                *) font=$2 ; shift 2 ;;
+                *) font_file=$(fc-match "$2" --format=%{file}) ; shift 2 ;;
             esac ;;
         -t|--text) text=$2 ; shift 2 ;;
         -l|--listfonts)
-	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
-	    exit 0 ;;
-	-n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
-        --) shift; shot_custom=true; break ;;
+          fc-list --format="%{family[0]}\n" | sort -u
+          exit 0 ;;
+        -n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
+        --) shift; break ;;
         *) echo "error" ; exit 1 ;;
     esac
 done
 
-if "$shot_custom" && [[ $# -gt 0 ]]; then
-    shot=("$@");
-fi
+# start dynamically creating the filtergraph which will be passed to ffmpeg
+filtergraph="[0:v] $greyscale $effect [out-0];"
 
-command -- "${shot[@]}" "$image"
+# add lock images to filtergraph
+for ((i=0; i < $number_of_monitors; ++i)); do
+    filtergraph="$filtergraph [out-$i][1:v] overlay=${mid_x[i]}-overlay_w/2:${mid_y_i[i]}-overlay_h/2 [out-$((i + 1))];"
+done
 
-value="60" #brightness value to compare to
+# add text filter to filtergraph
+# this uses various drawtext filters with black and white text
+text_w=800
+text_h=100
+filtergraph="$filtergraph \
+color=color=white@0:size=${text_w}x${text_h}, \
+drawtext=text='$text':x=($text_w-text_w)/2+2:y=($text_h-text_h)/2+2:fontsize=25:fontfile=$font_file:fontcolor=black, \
+drawtext=text='$text':x=($text_w-text_w)/2:y=($text_h-text_h)/2:fontsize=25:fontfile=$font_file:fontcolor=black, \
+boxblur=2:2 [text-blur]; \
+color=color=white@0:size=${text_w}x${text_h}, \
+drawtext=text='$text':x=($text_w-text_w)/2+1:y=($text_h-text_h)/2+1:fontsize=25:fontfile=$font_file:fontcolor=black, \
+drawtext=text='$text':x=($text_w-text_w)/2+1:y=($text_h-text_h)/2+2:fontsize=25:fontfile=$font_file:fontcolor=black, \
+drawtext=text='$text':x=($text_w-text_w)/2+2:y=($text_h-text_h)/2+2:fontsize=25:fontfile=$font_file:fontcolor=black, \
+drawtext=text='$text':x=($text_w-text_w)/2:y=($text_h-text_h)/2:fontsize=25:fontfile=$font_file:fontcolor=white [text-shadow]; \
+[text-blur][text-shadow] overlay [text-0];"
 
-color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
-    -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
+# duplicate the text filter into multiple filters, one per monitor
+for ((i=0; i < $((number_of_monitors - 1)); ++i)); do
+    filtergraph="$filtergraph [text-$i] split [text-$i][text-$((i+1))];"
+done
 
-if [[ $color -gt $value ]]; then #white background image and black text
-    bw="black"
-    icon="/usr/share/i3lock-fancy/icons/lockdark.png"
-    param=("--insidecolor=0000001c" "--ringcolor=0000003e" \
-        "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
-        "--separatorcolor=22222260" "--insidevercolor=ffffff1c" \
-        "--ringwrongcolor=ffffff55" "--insidewrongcolor=ffffff1c" \
-        "--verifcolor=ffffff00" "--wrongcolor=ff000000" "--timecolor=ffffff00" \
-        "--datecolor=ffffff00" "--layoutcolor=ffffff00")
-else #black
-    bw="white"
-    icon="/usr/share/i3lock-fancy/icons/lock.png"
-    param=("--insidecolor=ffffff1c" "--ringcolor=ffffff3e" \
-        "--linecolor=ffffff00" "--keyhlcolor=00000080" "--ringvercolor=00000000" \
-        "--separatorcolor=22222260" "--insidevercolor=0000001c" \
-        "--ringwrongcolor=00000055" "--insidewrongcolor=0000001c" \
-        "--verifcolor=00000000" "--wrongcolor=ff000000" "--timecolor=00000000" \
-        "--datecolor=00000000" "--layoutcolor=00000000")
-fi
+# overlay everything together
+for ((i=0; i < $number_of_monitors; ++i)); do
+    filtergraph="$filtergraph [out-$((number_of_monitors + i))][text-$i] overlay=${mid_x[i]}-overlay_w/2:${mid_y_t[i]}-overlay_h/2 [out-$((number_of_monitors + i + 1))];"
+done
 
-convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
-    -annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
+# remove the trailing semicolon
+filtergraph="${filtergraph::-1}"
+
+ffmpeg -f x11grab -video_size "${screen_res_x}x${screen_res_y}" \
+    -y -i $DISPLAY -i "$lock_file" -filter_complex "$filtergraph" \
+    -map "[out-$((number_of_monitors * 2))]" -vframes 1 "$image_file"
 
 # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
 # the desktop) before locking.
 ${desktop} ${desktop:+-k on}
 
-# try to use i3lock with prepared parameters
-if ! "${i3lock_cmd[@]}" "${param[@]}" >/dev/null 2>&1; then
-    # We have failed, lets get back to stock one
-    "${i3lock_cmd[@]}"
-fi
+"${i3lock_cmd[@]}"
 
 # As above, if we were passed -d/--desktop, we'll attempt to restore all windows
 # after unlocking.
