@@ -143,7 +143,7 @@ done
 # remove the trailing semicolon
 filtergraph="${filtergraph::-1}"
 
-ffmpeg -f x11grab -video_size "${screen_res_x}x${screen_res_y}" \
+ffmpeg -f x11grab -draw_mouse 0 -video_size "${screen_res_x}x${screen_res_y}" \
     -y -i $DISPLAY -i "$lock_file" -filter_complex "$filtergraph" \
     -map "[out-$((number_of_monitors * 2))]" -vframes 1 "$image_file"
 
