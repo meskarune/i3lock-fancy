@@ -64,6 +64,11 @@ Usage
 
 example: ```i3lock-fancy -gpf Comic-Sans-MS -- scrot -z```
 
+Missing Features
+------
+The Black and white theme option is currently judging the entire array of screens, instead of every screen individually.
+Downsides to taking screen-shots per screen, is performance based.
+
 Extras
 ------
 
