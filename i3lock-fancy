@@ -98,8 +98,8 @@ color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace h
     -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
 
 if [[ $color -gt $value ]]; then #white background image and black text
-    bw="black"
-    icon="/usr/share/i3lock-fancy/icons/lockdark.png"
+    bw="white"
+    icon="/usr/share/i3lock-fancy/icons/lock.png"
     param=("--insidecolor=0000001c" "--ringcolor=0000003e" \
         "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
         "--separatorcolor=22222260" "--insidevercolor=ffffff1c" \
@@ -107,8 +107,8 @@ if [[ $color -gt $value ]]; then #white background image and black text
         "--verifcolor=ffffff00" "--wrongcolor=ff000000" "--timecolor=ffffff00" \
         "--datecolor=ffffff00" "--layoutcolor=ffffff00")
 else #black
-    bw="white"
-    icon="/usr/share/i3lock-fancy/icons/lock.png"
+    bw="black"
+    icon="/usr/share/i3lock-fancy/icons/lockdark.png"
     param=("--insidecolor=ffffff1c" "--ringcolor=ffffff3e" \
         "--linecolor=ffffff00" "--keyhlcolor=00000080" "--ringvercolor=00000000" \
         "--separatorcolor=22222260" "--insidevercolor=0000001c" \
@@ -117,7 +117,36 @@ else #black
         "--datecolor=00000000" "--layoutcolor=00000000")
 fi
 
-convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center "$image"
+
+LOCK=()
+while read LINE
+do
+    if [[ "$LINE" =~ ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) ]]; then
+        w=${BASH_REMATCH[1]}
+        h=${BASH_REMATCH[2]}
+        Xoff=${BASH_REMATCH[3]}
+        Yoff=${BASH_REMATCH[4]}
+        midx=$(($w / 2 + $Xoff - 60  / 2))
+        midy=$(($h / 2 + $Yoff - 60  / 2))
+        lock+=($icon -geometry +$midx+$midy -composite)
+    fi
+done <<<"$(xrandr)"
+LOCK2=()
+while read LINE
+do
+    if [[ "$LINE" =~ ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) ]]; then
+        w=${BASH_REMATCH[1]}
+        h=${BASH_REMATCH[2]}
+        Xoff=${BASH_REMATCH[3]}
+        Yoff=${BASH_REMATCH[4]}
+        midx=$(($w / 2 + $Xoff - 60  / 2 - 95))
+        midy=$(($h / 2 + $Yoff - 60  / 2 + 160))
+        lock2+=(-annotate +$midx+$midy "$text" )
+    fi
+done <<<"$(xrandr)"
+
+convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" \
+  "${lock[@]}" "${lock2[@]}" "$image"
 
 # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
 # the desktop) before locking.
