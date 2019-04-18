@@ -98,8 +98,8 @@ color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace h
     -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
 
 if [[ $color -gt $value ]]; then #white background image and black text
-    bw="white"
-    icon="/usr/share/i3lock-fancy/icons/lock.png"
+    bw="black"
+    icon="/usr/share/i3lock-fancy/icons/lockdark.png"
     param=("--insidecolor=0000001c" "--ringcolor=0000003e" \
         "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
         "--separatorcolor=22222260" "--insidevercolor=ffffff1c" \
@@ -107,8 +107,8 @@ if [[ $color -gt $value ]]; then #white background image and black text
         "--verifcolor=ffffff00" "--wrongcolor=ff000000" "--timecolor=ffffff00" \
         "--datecolor=ffffff00" "--layoutcolor=ffffff00")
 else #black
-    bw="black"
-    icon="/usr/share/i3lock-fancy/icons/lockdark.png"
+    bw="white"
+    icon="/usr/share/i3lock-fancy/icons/lock.png"
     param=("--insidecolor=ffffff1c" "--ringcolor=ffffff3e" \
         "--linecolor=ffffff00" "--keyhlcolor=00000080" "--ringvercolor=00000000" \
         "--separatorcolor=22222260" "--insidevercolor=0000001c" \
