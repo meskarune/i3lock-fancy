@@ -60,6 +60,7 @@ case "${LANG:-}" in
     nb_* ) text="Skriv inn passord" ;; # Norwegian
     pl_* ) text="Podaj hasło" ;; # Polish
     pt_* ) text="Digite a senha para desbloquear" ;; # Português
+    tr_* ) text="Giriş yapmak için şifrenizi girin" ;; # Turkish
     ru_* ) text="Введите пароль" ;; # Russian
     * ) text="Type password to unlock" ;; # Default to English
 esac
