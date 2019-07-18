@@ -70,7 +70,7 @@ Usage
         --               Must be last option. Set command to use for taking a
                          screenshot. Default is 'import -window root'. Using 'scrot'
                          or 'maim' will increase script speed and allow setting
-                         custom flags like haing a delay.
+                         custom flags like having a delay.
 
 example: ```i3lock-fancy -gpf Comic-Sans-MS -- scrot -z```
 
