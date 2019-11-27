@@ -79,7 +79,7 @@ while true ; do
             esac ;;
         -t|--text) text=$2 ; shift 2 ;;
         -l|--listfonts)
-	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
+	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- "${PAGER:-less}"
 	    exit 0 ;;
 	-n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
         --) shift; shot_custom=true; break ;;
