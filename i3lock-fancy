@@ -46,7 +46,7 @@ eval set -- "$temp"
 # l10n support
 text="Type password to unlock"
 case "${LANG:-}" in
-    af_* ) text="Tipe wagwoord om te ontsluit" ;; # Afrikaans
+    af_* ) text="Tik wagwoord om te ontsluit" ;; # Afrikaans
     de_* ) text="Bitte Passwort eingeben" ;; # Deutsch
     da_* ) text="Indtast adgangskode" ;; # Danish
     en_* ) text="Type password to unlock" ;; # English
@@ -60,6 +60,7 @@ case "${LANG:-}" in
     nb_* ) text="Skriv inn passord" ;; # Norwegian
     pl_* ) text="Podaj hasło" ;; # Polish
     pt_* ) text="Digite a senha para desbloquear" ;; # Português
+    tr_* ) text="Giriş yapmak için şifrenizi girin" ;; # Turkish
     ru_* ) text="Введите пароль" ;; # Russian
     * ) text="Type password to unlock" ;; # Default to English
 esac
