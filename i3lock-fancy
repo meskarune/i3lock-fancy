@@ -46,7 +46,7 @@ eval set -- "$temp"
 # l10n support
 text="Type password to unlock"
 case "${LANG:-}" in
-    af_* ) text="Tik wagwoord om te ontsluit" ;; # Afrikaans
+    af_* ) text="Tipe wagwoord om te ontsluit" ;; # Afrikaans
     de_* ) text="Bitte Passwort eingeben" ;; # Deutsch
     da_* ) text="Indtast adgangskode" ;; # Danish
     en_* ) text="Type password to unlock" ;; # English
@@ -60,7 +60,6 @@ case "${LANG:-}" in
     nb_* ) text="Skriv inn passord" ;; # Norwegian
     pl_* ) text="Podaj hasło" ;; # Polish
     pt_* ) text="Digite a senha para desbloquear" ;; # Português
-    tr_* ) text="Giriş yapmak için şifrenizi girin" ;; # Turkish
     ru_* ) text="Введите пароль" ;; # Russian
     * ) text="Type password to unlock" ;; # Default to English
 esac
@@ -79,7 +78,7 @@ while true ; do
             esac ;;
         -t|--text) text=$2 ; shift 2 ;;
         -l|--listfonts)
-	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
+	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- "${PAGER:-less}"
 	    exit 0 ;;
 	-n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
         --) shift; shot_custom=true; break ;;
@@ -118,8 +117,33 @@ else #black
         "--datecolor=00000000" "--layoutcolor=00000000")
 fi
 
-convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
-    -annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
+while read -r LINE
+do
+    if [[ "$LINE" =~ ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) ]]; then
+        w=${BASH_REMATCH[1]}
+        h=${BASH_REMATCH[2]}
+        Xoff=${BASH_REMATCH[3]}
+        Yoff=${BASH_REMATCH[4]}
+        midx=$((w / 2 + Xoff - 60  / 2))
+        midy=$((h / 2 + Yoff - 60  / 2))
+        lock+=("$icon" -geometry "+$midx""+$midy" -composite)
+    fi
+done <<<"$(xrandr)"
+while read -r LINE
+do
+    if [[ "$LINE" =~ ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) ]]; then
+        w=${BASH_REMATCH[1]}
+        h=${BASH_REMATCH[2]}
+        Xoff=${BASH_REMATCH[3]}
+        Yoff=${BASH_REMATCH[4]}
+        midx=$((w / 2 + Xoff - 60  / 2 - 95))
+        midy=$((h / 2 + Yoff - 60  / 2 + 160))
+        lock2+=(-annotate "+$midx""+$midy" "$text" )
+    fi
+done <<<"$(xrandr)"
+
+convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" \
+  "${lock[@]}" "${lock2[@]}" "$image"
 
 # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
 # the desktop) before locking.
