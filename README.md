@@ -68,7 +68,7 @@ Usage
         -n, --nofork     Do not fork i3lock after starting.
     
         --               Must be last option. Set command to use for taking a
-                         screenshot. Default is 'import -window root'. Using 'scrot'
+                         screenshot. Default is 'import -window root -define png:compression-level=1'. Using 'scrot'
                          or 'maim' will increase script speed and allow setting
                          custom flags like having a delay.
 

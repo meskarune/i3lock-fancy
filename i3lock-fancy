@@ -8,7 +8,7 @@ effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
 # default system sans-serif font
 font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
 image=$(mktemp --suffix=.png)
-shot=(import -window root)
+shot=(import -window root -define png:compression-level=1)
 desktop=""
 i3lock_cmd=(i3lock -i "$image")
 shot_custom=false
@@ -33,7 +33,7 @@ options="Options:
     -n, --nofork     Do not fork i3lock after starting.
 
     --               Must be last option. Set command to use for taking a
-                     screenshot. Default is 'import -window root'. Using 'scrot'
+                     screenshot. Default is 'import -window root -define png:compression-level=1'. Using 'scrot'
                      or 'maim' will increase script speed and allow setting
                      custom flags like having a delay."
 
