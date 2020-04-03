@@ -20,6 +20,7 @@ Optional Dependencies
 ---------------------
 * wmctrl
 * a screenshot utility such as scrot or maim.
+* xkb-switch
 
 Installation
 ------------
