@@ -104,7 +104,7 @@ fi
 # check selected and save current layout
 if [[ $layout != "" ]]; then
     if [[ $(xkb-switch -l) != *"$layout"* ]]; then
-        echo "Invalid layout. Please, check --layoutslist"; exit 1
+        echo "Invalid layout. Please, check --listlayouts"; exit 1
     fi
     last_layout=$(xkb-switch)
 fi
