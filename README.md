@@ -15,6 +15,7 @@ Dependencies
 * bash
 * awk
 * util-linux
+* xrandr
 
 Optional Dependencies
 ---------------------

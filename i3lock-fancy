@@ -7,10 +7,8 @@ hue=(-level "0%,100%,0.6")
 effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
 # default system sans-serif font
 font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
-image=$(mktemp --suffix=.png)
 shot=(import -window root)
 desktop=""
-i3lock_cmd=(i3lock -i "$image")
 shot_custom=false
 
 options="Options:
@@ -39,7 +37,6 @@ options="Options:
 
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
-trap 'rm -f "$image"' EXIT
 temp="$(getopt -o :hdnpglt:f: -l desktop,help,listfonts,nofork,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
 eval set -- "$temp"
 
@@ -79,9 +76,9 @@ while true ; do
             esac ;;
         -t|--text) text=$2 ; shift 2 ;;
         -l|--listfonts)
-	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
-	    exit 0 ;;
-	-n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
+            convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
+            exit 0 ;;
+        -n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
         --) shift; shot_custom=true; break ;;
         *) echo "error" ; exit 1 ;;
     esac
@@ -91,35 +88,54 @@ if "$shot_custom" && [[ $# -gt 0 ]]; then
     shot=("$@");
 fi
 
+process() {
+    local image="$1"
+    local value="60" #brightness value to compare to
+    color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
+        -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
+
+    if [[ $color -gt $value ]]; then #white background image and black text
+        bw="black"
+        icon="/usr/share/i3lock-fancy/icons/lockdark.png"
+        param=("--insidecolor=0000001c" "--ringcolor=0000003e" \
+            "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
+            "--separatorcolor=22222260" "--insidevercolor=ffffff1c" \
+            "--ringwrongcolor=ffffff55" "--insidewrongcolor=ffffff1c" \
+            "--verifcolor=ffffff00" "--wrongcolor=ff000000" "--timecolor=ffffff00" \
+            "--datecolor=ffffff00" "--layoutcolor=ffffff00")
+    else #black
+        bw="white"
+        icon="/usr/share/i3lock-fancy/icons/lock.png"
+        param=("--insidecolor=ffffff1c" "--ringcolor=ffffff3e" \
+            "--linecolor=ffffff00" "--keyhlcolor=00000080" "--ringvercolor=00000000" \
+            "--separatorcolor=22222260" "--insidevercolor=0000001c" \
+            "--ringwrongcolor=00000055" "--insidewrongcolor=0000001c" \
+            "--verifcolor=00000000" "--wrongcolor=ff000000" "--timecolor=00000000" \
+            "--datecolor=00000000" "--layoutcolor=00000000")
+    fi
+
+    convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
+        -annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
+}
+
+
+dir=$(mktemp --tmpdir --directory "i3lock-fancy.XXXXXXXXXX")
+trap 'rm -rf "$dir"' EXIT
+
+image="$dir/iamge.png"
+i3lock_cmd=(i3lock -i "$image")
 command -- "${shot[@]}" "$image"
 
-value="60" #brightness value to compare to
+whole="$dir/whole.png"
 
-color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
-    -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
+cp -f "$image" "$whole"
+for geo in $(xrandr --listmonitors |cut -d " " -f 4 |sed "s/\/[0-9]*//g"); do
+    part="$dir/part-$geo.png"
+    convert "$whole" -crop "$geo" +repage "$part"
+    process "$part"
+    convert "$image" "$part" -geometry "$geo" -composite "$image"
+done
 
-if [[ $color -gt $value ]]; then #white background image and black text
-    bw="black"
-    icon="/usr/share/i3lock-fancy/icons/lockdark.png"
-    param=("--insidecolor=0000001c" "--ringcolor=0000003e" \
-        "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
-        "--separatorcolor=22222260" "--insidevercolor=ffffff1c" \
-        "--ringwrongcolor=ffffff55" "--insidewrongcolor=ffffff1c" \
-        "--verifcolor=ffffff00" "--wrongcolor=ff000000" "--timecolor=ffffff00" \
-        "--datecolor=ffffff00" "--layoutcolor=ffffff00")
-else #black
-    bw="white"
-    icon="/usr/share/i3lock-fancy/icons/lock.png"
-    param=("--insidecolor=ffffff1c" "--ringcolor=ffffff3e" \
-        "--linecolor=ffffff00" "--keyhlcolor=00000080" "--ringvercolor=00000000" \
-        "--separatorcolor=22222260" "--insidevercolor=0000001c" \
-        "--ringwrongcolor=00000055" "--insidewrongcolor=0000001c" \
-        "--verifcolor=00000000" "--wrongcolor=ff000000" "--timecolor=00000000" \
-        "--datecolor=00000000" "--layoutcolor=00000000")
-fi
-
-convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
-    -annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
 
 # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
 # the desktop) before locking.
