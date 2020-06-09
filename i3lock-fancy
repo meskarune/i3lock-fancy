@@ -62,31 +62,33 @@ case "${LANG:-}" in
     * ) text="Type password to unlock" ;; # Default to English
 esac
 
-while true ; do
-    case "$1" in
-        -h|--help)
-            printf "Usage: %s [options]\n\n%s\n\n" "${0##*/}" "$options"; exit 1 ;;
-        -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
-        -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -average) ; shift ;;
-        -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
-        -f|--font)
-            case "$2" in
-                "") shift 2 ;;
-                *) font=$2 ; shift 2 ;;
-            esac ;;
-        -t|--text) text=$2 ; shift 2 ;;
-        -l|--listfonts)
-            convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
-            exit 0 ;;
-        -n|--nofork) i3lock_cmd+=(--nofork) ; shift ;;
-        --) shift; shot_custom=true; break ;;
-        *) echo "error" ; exit 1 ;;
-    esac
-done
+parse_args() {
+    while true ; do
+        case "$1" in
+            -h|--help)
+                printf "Usage: %s [options]\n\n%s\n\n" "${0##*/}" "$options"; exit 1 ;;
+            -d|--desktop) desktop=$(command -V wmctrl) ; shift ;;
+            -g|--greyscale) hue=(-level "0%,100%,0.6" -set colorspace Gray -average) ; shift ;;
+            -p|--pixelate) effect=(-scale 10% -scale 1000%) ; shift ;;
+            -f|--font)
+                case "$2" in
+                    "") shift 2 ;;
+                    *) font=$2 ; shift 2 ;;
+                esac ;;
+            -t|--text) text=$2 ; shift 2 ;;
+            -l|--listfonts)
+                convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
+                exit 0 ;;
+            -n|--nofork) i3lock_cmd+=($1) ; shift ;;
+            --) shift; shot_custom=true; break ;;
+            *) echo "error" ; exit 1 ;;
+        esac
+    done
 
-if "$shot_custom" && [[ $# -gt 0 ]]; then
-    shot=("$@");
-fi
+    if "$shot_custom" && [[ $# -gt 0 ]]; then
+        shot=("$@");
+    fi
+}
 
 process() {
     local image="$1"
@@ -125,6 +127,7 @@ trap 'rm -rf "$dir"' EXIT
 image="$dir/iamge.png"
 i3lock_cmd=(i3lock -i "$image")
 command -- "${shot[@]}" "$image"
+parse_args "$@"
 
 whole="$dir/whole.png"
 
