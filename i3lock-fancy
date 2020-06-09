@@ -4,12 +4,14 @@
 set -o errexit -o noclobber -o nounset
 
 hue=(-level "0%,100%,0.6")
-effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
+effect=(-filter Gaussian -resize 25% -define "filter:sigma=1.8")
 # default system sans-serif font
 font=$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")
 shot=(import -window root)
 desktop=""
 shot_custom=false
+i3lock_cmd="${i3lock_cmd:-i3lock}"
+data_dir=${data_dir:-/usr/share/i3lock-fancy}
 
 options="Options:
     -h, --help       This help menu.
@@ -79,7 +81,7 @@ parse_args() {
             -l|--listfonts)
                 convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
                 exit 0 ;;
-            -n|--nofork) i3lock_cmd+=($1) ; shift ;;
+            -n|--nofork) i3lock_args+=($1) ; shift ;;
             --) shift; shot_custom=true; break ;;
             *) echo "error" ; exit 1 ;;
         esac
@@ -91,24 +93,26 @@ parse_args() {
 }
 
 process() {
-    local image="$1"
+    local geo="$1"
+    local part="$dir/$geo.png"
     local value="60" #brightness value to compare to
-    color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
+    local color
+    color=$(convert "$image" -crop "$geo" +repage -gravity center -crop 100x100+0+0 +repage -colorspace hsb \
         -resize 1x1 txt:- | awk -F '[%$]' 'NR==2{gsub(",",""); printf "%.0f\n", $(NF-1)}');
 
-    if [[ $color -gt $value ]]; then #white background image and black text
-        bw="black"
-        icon="/usr/share/i3lock-fancy/icons/lockdark.png"
-        param=("--insidecolor=0000001c" "--ringcolor=0000003e" \
+    if (( value < color )); then #white background image and black text
+        local bw="black"
+        local icon="$data_dir/icons/lockdark.png"
+        local color_args=("--insidecolor=0000001c" "--ringcolor=0000003e" \
             "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
             "--separatorcolor=22222260" "--insidevercolor=ffffff1c" \
             "--ringwrongcolor=ffffff55" "--insidewrongcolor=ffffff1c" \
             "--verifcolor=ffffff00" "--wrongcolor=ff000000" "--timecolor=ffffff00" \
             "--datecolor=ffffff00" "--layoutcolor=ffffff00")
     else #black
-        bw="white"
-        icon="/usr/share/i3lock-fancy/icons/lock.png"
-        param=("--insidecolor=ffffff1c" "--ringcolor=ffffff3e" \
+        local bw="white"
+        local icon="$data_dir/icons/lock.png"
+        local color_args=("--insidecolor=ffffff1c" "--ringcolor=ffffff3e" \
             "--linecolor=ffffff00" "--keyhlcolor=00000080" "--ringvercolor=00000000" \
             "--separatorcolor=22222260" "--insidevercolor=0000001c" \
             "--ringwrongcolor=00000055" "--insidewrongcolor=0000001c" \
@@ -116,40 +120,55 @@ process() {
             "--datecolor=00000000" "--layoutcolor=00000000")
     fi
 
-    convert "$image" "${hue[@]}" "${effect[@]}" -font "$font" -pointsize 26 -fill "$bw" -gravity center \
-        -annotate +0+160 "$text" "$icon" -gravity center -composite "$image"
+    convert \
+        "$image" -crop "$geo" +repage \
+        -gravity center "${hue[@]}" "${effect[@]}" -resize $geo -font "$font" -pointsize 26 -fill "$bw" \
+        -annotate +0+160 "$text" "$icon" -gravity center -composite "$part"
+
+    if [[ $geo =~ "+0+0" ]]; then
+        for x in ${color_args[@]}; do echo $x >> "$dir/color_args"; done
+    fi
 }
 
+main() {
+    i3lock_args=()
+    parse_args "$@"
 
-dir=$(mktemp --tmpdir --directory "i3lock-fancy.XXXXXXXXXX")
-trap 'rm -rf "$dir"' EXIT
+    dir=$(mktemp --tmpdir --directory "i3lock-fancy.XXXXXXXXXX")
+    trap 'rm -rf "$dir"' EXIT
 
-image="$dir/iamge.png"
-i3lock_cmd=(i3lock -i "$image")
-command -- "${shot[@]}" "$image"
-parse_args "$@"
+    image="$dir/iamge.png"
+    i3lock_args+=(-i "$image")
 
-whole="$dir/whole.png"
+    command -- "${shot[@]}" "$image"
 
-cp -f "$image" "$whole"
-for geo in $(xrandr --listmonitors |cut -d " " -f 4 |sed "s/\/[0-9]*//g"); do
-    part="$dir/part-$geo.png"
-    convert "$whole" -crop "$geo" +repage "$part"
-    process "$part"
-    convert "$image" "$part" -geometry "$geo" -composite "$image"
-done
+    local geos
+    geos=$(xrandr --listmonitors |cut -d " " -f 4 |sed "s/\/[0-9]*//g")
+    for geo in $geos; do
+        process "$geo" &
+        echo $! >> "$dir/pids"
+    done
 
+    wait < "$dir/pids"
+    mapfile -t color_args < "$dir/color_args"
 
-# If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
-# the desktop) before locking.
-${desktop} ${desktop:+-k on}
+    convert "$image" \
+            $(for geo in $geos; do echo "$dir/$geo.png" -geometry "$geo" -composite; done) \
+            "$image"
 
-# try to use i3lock with prepared parameters
-if ! "${i3lock_cmd[@]}" "${param[@]}" >/dev/null 2>&1; then
-    # We have failed, lets get back to stock one
-    "${i3lock_cmd[@]}"
-fi
+    # If invoked with -d/--desktop, we'll attempt to minimize all windows (ie. show
+    # the desktop) before locking.
+    ${desktop} ${desktop:+-k on}
 
-# As above, if we were passed -d/--desktop, we'll attempt to restore all windows
-# after unlocking.
-${desktop} ${desktop:+-k off}
+    # try to use i3lock with prepared parameters
+    if ! "${i3lock_cmd[@]}" "${i3lock_args[@]}" "${color_args[@]}" >/dev/null 2>&1; then
+        # We have failed, lets get back to stock one
+        "${i3lock_cmd[@]}" "${i3lock_args[@]}"
+    fi
+
+    # As above, if we were passed -d/--desktop, we'll attempt to restore all windows
+    # after unlocking.
+    ${desktop} ${desktop:+-k off}
+}
+
+main "$@"
