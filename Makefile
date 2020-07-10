@@ -10,7 +10,7 @@ install:
 	@install -Dm644 LICENSE               -t $(DESTDIR)$(SHRDIR)/licenses/$(PRGM)
 
 uninstall:
-	@unlink $(BINDIR)/$(PRGM) # Remove binary
-	@rm -Rf $(SHRDIR)/$(PRGM) # Remove icons
-	@unlink $(SHRDIR)/man/man1/i3lock-fancy.1 # Remove man
-	@rm -Rf $(SHRDIR)/licenses/$(PRGM) # Remove license
+	@unlink $(DESTDIR)$(BINDIR)/$(PRGM) # Remove binary
+	@rm -Rf $(DESTDIR)$(SHRDIR)/$(PRGM) # Remove icons
+	@unlink $(DESTDIR)$(SHRDIR)/man/man1/i3lock-fancy.1 # Remove man
+	@rm -Rf $(DESTDIR)$(SHRDIR)/licenses/$(PRGM) # Remove license
