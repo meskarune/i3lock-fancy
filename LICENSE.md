@@ -1,3 +1,5 @@
+# Everything in this repository except `icons/*`
+
 The MIT License (MIT)
 
 Copyright (c) 2014 Dolores Portalatin
@@ -20,3 +22,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+# `icons/*`
+
+[Apache License 2.0](https://github.com/google/material-design-icons/blob/master/LICENSE)
