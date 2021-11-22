@@ -26,9 +26,8 @@ Installation
 To install i3lock-fancy-dualmonitor manually, git clone the repository, checkout
 the dual monitors branch and run the make file.:
 
-    git clone https://github.com/meskarune/i3lock-fancy.git
+    git clone -b dualmonitors https://github.com/meskarune/i3lock-fancy.git
     cd i3lock-fancy
-    git checkout i3lock-fancy-dualmonitors
     sudo make install
 
 **IMPORTANT NOTE: the way to install i3lock-fancy has changed! If you are a
