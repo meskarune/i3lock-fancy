@@ -38,7 +38,7 @@ things so updates will be easier in the future.**
 Usage
 -----
 
-    lock [options]
+    i3lock-fancy-dualmonitor [options]
 
     Options:
         -h, --help   This help menu.
@@ -46,7 +46,7 @@ Usage
         -p, --pixelate   Pixelate the background instead of blur, runs faster.
         -f <fontname>, --font <fontname>  Set a custom font. Type 'convert -list font' in a terminal to get a list.
 
-example: ```lock -gpf Comic-Sans-MS```
+example: ```i3lock-fancy-dualmonitor -gpf Comic-Sans-MS```
 
 Extras
 ------
