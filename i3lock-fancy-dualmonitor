@@ -7,7 +7,9 @@ HUE=(-level 0%,100%,0.6)
 EFFECT=(-filter Gaussian -resize 20% -define filter:sigma=1.5 -resize 500.5%)
 # default system sans-serif font
 FONT="$(convert -list font | awk "{ a[NR] = \$2 } /family: $(fc-match sans -f "%{family}\n")/ { print a[NR-1]; exit }")"
-IMAGE="$(mktemp).png"
+#IMAGE="$(mktemp).png"
+IMAGE=$(mktemp --suffix=.png)
+SHOT=(import -silent -window root)
 DM=$(xdpyinfo | awk '/^  dimensions(.+([0-9]+))/{print $2}')
 
 OPTIONS="Options:
@@ -57,7 +59,9 @@ case "${LANG:-}" in
     * ) TEXT="Type password to unlock" ;; # Default to English
 esac
 
-scrot -z "$IMAGE"
+#scrot -z "$IMAGE"
+command -- "${SHOT[@]}" "$IMAGE"
+
 ICON="/usr/share/i3lock-fancy-dualmonitor/lock.png"
 PARAM=("--insidecolor=0000001c" "--ringcolor=0000003e" \
     "--linecolor=00000000" "--keyhlcolor=ffffff80" "--ringvercolor=ffffff00" \
