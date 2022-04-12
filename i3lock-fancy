@@ -65,6 +65,7 @@ case "${LANG:-}" in
     sk_* ) text="Pre odomknutie zadajte heslo" ;; # Slovak
     tr_* ) text="Giriş yapmak için şifrenizi girin" ;; # Turkish
     ru_* ) text="Введите пароль" ;; # Russian
+    zh_* ) text="请输入密码以解锁" ;; # Chinese
     * ) text="Type password to unlock" ;; # Default to English
 esac
 
