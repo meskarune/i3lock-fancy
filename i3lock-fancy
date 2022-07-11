@@ -44,7 +44,6 @@ temp="$(getopt -o :hdnpglt:f: -l desktop,help,listfonts,nofork,pixelate,greyscal
 eval set -- "$temp"
 
 # l10n support
-text="Type password to unlock"
 case "${LANG:-}" in
     af_* ) text="Tik wagwoord om te ontsluit" ;; # Afrikaans
     cs_* ) text="Pro odemčení zadajte heslo" ;; # Czech
@@ -53,7 +52,7 @@ case "${LANG:-}" in
     en_* ) text="Type password to unlock" ;; # English
     es_* ) text="Ingrese su contraseña" ;; # Española
     fr_* ) text="Entrez votre mot de passe" ;; # Français
-    he_* ) text="הליענה לטבל המסיס דלקה" ;; # Hebrew עברית (convert doesn't play bidi well)
+    he_* ) text="הקלד סיסמה לביטול הנעילה" ;; # Hebrew עברית
     hi_* ) text="अनलॉक करने के लिए पासवर्ड टाईप करें" ;; #Hindi
     id_* ) text="Masukkan kata sandi Anda" ;; # Bahasa Indonesia
     it_* ) text="Inserisci la password" ;; # Italian
