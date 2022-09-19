@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
-# Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional)
+# Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional), fprintd (optional)
 set -o errexit -o noclobber -o nounset
+
+cwd=$(cd "$(dirname "$0")"; pwd)
 
 hue=(-level "0%,100%,0.6")
 effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
@@ -11,6 +13,7 @@ image=$(mktemp --suffix=.png)
 shot=(import -silent -window root)
 desktop=""
 i3lock_cmd=(i3lock -i "$image")
+enable_fprint=false
 shot_custom=false
 
 options="Options:
@@ -32,6 +35,8 @@ options="Options:
 
     -n, --nofork     Do not fork i3lock after starting.
 
+    -r, --fprint     Enable fingerprint support via fprintd
+
     --               Must be last option. Set command to use for taking a
                      screenshot. Default is 'import -window root'. Using 'scrot'
                      or 'maim' will increase script speed and allow setting
@@ -40,7 +45,7 @@ options="Options:
 # move pipefail down as for some reason "convert -list font" returns 1
 set -o pipefail
 trap 'rm -f "$image"' EXIT
-temp="$(getopt -o :hdnpglt:f: -l desktop,help,listfonts,nofork,pixelate,greyscale,text:,font: --name "$0" -- "$@")"
+temp="$(getopt -o :hdnpgrlt:f: -l desktop,help,listfonts,nofork,pixelate,greyscale,fprint,text:,font: --name "$0" -- "$@")"
 eval set -- "$temp"
 
 # l10n support
@@ -82,6 +87,7 @@ while true ; do
                 *) font=$2 ; shift 2 ;;
             esac ;;
         -t|--text) text=$2 ; shift 2 ;;
+        -r|--fprint) enable_fprint=true ; shift ;;
         -l|--listfonts)
 	    convert -list font | awk -F: '/Font: / { print $2 }' | sort -du | command -- ${PAGER:-less}
 	    exit 0 ;;
@@ -104,7 +110,7 @@ color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace h
 
 if [[ $color -gt $value ]]; then #white background image and black text
     bw="black"
-    icon="/usr/share/i3lock-fancy/icons/lockdark.png"
+    icon="$cwd/icons/lockdark.png"
     param=("--inside-color=0000001c" "--ring-color=0000003e" \
         "--line-color=00000000" "--keyhl-color=ffffff80" "--ringver-color=ffffff00" \
         "--separator-color=22222260" "--insidever-color=ffffff1c" \
@@ -113,7 +119,7 @@ if [[ $color -gt $value ]]; then #white background image and black text
         "--date-color=ffffff00" "--layout-color=ffffff00")
 else #black
     bw="white"
-    icon="/usr/share/i3lock-fancy/icons/lock.png"
+    icon="$cwd/icons/lock.png"
     param=("--inside-color=ffffff1c" "--ring-color=ffffff3e" \
         "--line-color=ffffff00" "--keyhl-color=00000080" "--ringver-color=00000000" \
         "--separator-color=22222260" "--insidever-color=0000001c" \
@@ -135,6 +141,13 @@ if ! "${i3lock_cmd[@]}" "${param[@]}" >/dev/null 2>&1; then
     "${i3lock_cmd[@]}"
 fi
 
-# As above, if we were passed -d/--desktop, we'll attempt to restore all windows
-# after unlocking.
-${desktop} ${desktop:+-k off}
+if "$enable_fprint" ; then
+    while pidof -q i3lock; do
+      if fprintd-verify | grep -q verify-match; then 
+        ${desktop} ${desktop:+-k off}
+        killall -s9 i3lock
+      fi
+    done
+else
+    ${desktop} ${desktop:+-k off}
+fi
