@@ -3,7 +3,7 @@
 # Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional), fprintd (optional)
 set -o errexit -o noclobber -o nounset
 
-cwd=$(cd "$(dirname "$0")"; pwd)
+cwd=$(cd "$(dirname $(realpath "$0"))"; pwd)
 
 hue=(-level "0%,100%,0.6")
 effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
