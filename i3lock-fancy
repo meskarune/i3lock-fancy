@@ -2,6 +2,7 @@
 # Author: Dolores Portalatin <hello@doloresportalatin.info>
 # Dependencies: imagemagick, i3lock-color-git, scrot, wmctrl (optional)
 set -o errexit -o noclobber -o nounset
+SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 hue=(-level "0%,100%,0.6")
 effect=(-filter Gaussian -resize 20% -define "filter:sigma=1.5" -resize 500.5%)
@@ -103,7 +104,7 @@ color=$(convert "$image" -gravity center -crop 100x100+0+0 +repage -colorspace h
 
 if [[ $color -gt $value ]]; then #white background image and black text
     bw="black"
-    icon="/usr/share/i3lock-fancy/icons/lockdark.png"
+    icon="$SCRIPTPATH/../share/i3lock-fancy/icons/lockdark.png"
     param=("--inside-color=0000001c" "--ring-color=0000003e" \
         "--line-color=00000000" "--keyhl-color=ffffff80" "--ringver-color=ffffff00" \
         "--separator-color=22222260" "--insidever-color=ffffff1c" \
@@ -112,7 +113,7 @@ if [[ $color -gt $value ]]; then #white background image and black text
         "--date-color=ffffff00" "--layout-color=ffffff00")
 else #black
     bw="white"
-    icon="/usr/share/i3lock-fancy/icons/lock.png"
+    icon="$SCRIPTPATH/../share/i3lock-fancy/icons/lock.png"
     param=("--inside-color=ffffff1c" "--ring-color=ffffff3e" \
         "--line-color=ffffff00" "--keyhl-color=00000080" "--ringver-color=00000000" \
         "--separator-color=22222260" "--insidever-color=0000001c" \
